@@ -81,5 +81,63 @@ uv run python my_gpt2/generate.py こんにちは、私の名前は -n 50 -t 0.7
 uv run pytest
 ```
 
+## 💡 Baseモデルの実用的な活用法
+
+本プロジェクトで実装した GPT-2 は、現代のチャット専用モデル（Instructモデル）とは異なり、純粋に「次の単語を予測する」ための **Baseモデル** です。しかし、プロンプトの工夫（Few-shot / Completion）次第で以下のような実用的な使い方が可能です。
+
+### 1. 擬似的な対話（Chat）
+指示に従う訓練（Instruct）を受けていないモデルでも、「対話の記録」というパターンを模したプロンプトを渡すことで、アシスタントのように振る舞わせることができます。
+
+**プロンプト例:**
+```text
+User: Hello!
+Assistant: Hello! How can I help you today?
+User: What is the capital of France?
+Assistant:
+```
+
+```bash
+uv run python my_gpt2/generate.py "User: Hello!
+Assistant: Hello! How can I help you today?
+User: What is the capital of France?
+Assistant:" -n 5
+```
+
+### 2. パターンによる知識抽出（Analogy）
+「AはBである。ならばCはDである」という推論能力（アナロジー）を利用します。文章を途中で止めることで、モデルが持つ知識を自然な形で引き出すことができます。
+
+**プロンプト例:**
+```text
+The capital of Japan is Tokyo. The capital of France is
+```
+
+```bash
+uv run python my_gpt2/generate.py "The capital of Japan is Tokyo. The capital of France is" -n 5
+```
+
+### 3. 執筆の呼び水・ダミーテキスト生成
+物語や記事の書き出しを渡し、温度（Temperature）を調整することで、多様なアイデアを生成させることができます。
+
+**プロンプト例:**
+```text
+Once upon a time
+```
+
+```bash
+uv run python my_gpt2/generate.py "Once upon a time" -n 50 -t 0.8
+```
+
+### 4. 日本語での活用
+英語ベースのモデルですが、Byte-level BPE により日本語の入力も可能です。文法的な正しさは保証されませんが、技術的なデモとして短い文章の続きを生成させることができます。
+
+**プロンプト例:**
+```text
+昔々あるところに
+```
+
+```bash
+uv run python my_gpt2/generate.py "昔々あるところに" -n 20 -t 0.7
+```
+
 ---
 LLM の内部で何が起きているのかを、コードを通じて学ぶためのリポジトリです。
