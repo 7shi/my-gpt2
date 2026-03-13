@@ -1,9 +1,10 @@
 import numpy as np
+import argparse
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.model import GPT2
 from my_gpt2.loader import load_gpt2_weights
 
-def generate(prompt, n_tokens_to_generate=10, model_id="openai-community/gpt2"):
+def generate(prompt, n_tokens_to_generate=30, model_id="openai-community/gpt2"):
     # 1. Load custom tokenizer and weights
     tokenizer = Tokenizer()
     params = load_gpt2_weights(model_id)
@@ -39,11 +40,28 @@ def generate(prompt, n_tokens_to_generate=10, model_id="openai-community/gpt2"):
         # Print the newly generated token
         print(tokenizer.decode([next_token]), end="", flush=True)
         
+        # Stop if we hit the end-of-text token (50256 for GPT-2)
+        if next_token == 50256:
+            print("\n[End of text reached]")
+            break
+        
     print("\n\nFull output:")
     return tokenizer.decode(input_ids)
 
-if __name__ == "__main__":
-    import sys
-    prompt = sys.argv[1] if len(sys.argv) > 1 else "Alan Turing was a"
-    output = generate(prompt, n_tokens_to_generate=30)
+def main():
+    parser = argparse.ArgumentParser(description="GPT-2 Scratch Inference with NumPy")
+    # Position argument for prompt (one or more words)
+    parser.add_argument("prompt", nargs="+", help="Prompt text to start generation")
+    parser.add_argument("-n", "--n_tokens", type=int, default=30, help="Number of tokens to generate")
+    parser.add_argument("-m", "--model", type=str, default="openai-community/gpt2", help="Model ID or local path")
+    
+    args = parser.parse_args()
+    
+    # Join the prompt words with space
+    prompt_text = " ".join(args.prompt)
+    
+    output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, model_id=args.model)
     print(output)
+
+if __name__ == "__main__":
+    main()
