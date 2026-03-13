@@ -12,6 +12,15 @@
 - **テスト駆動開発 (TDD)**: 各コンポーネント（Attention, MLP, LayerNorm 等）が数学的に正しいことを `pytest` で検証済み。
 - **詳細な解説ドキュメント**: 「なぜその設計になっているのか」という動機（Motivation）を含めた技術解説を完備。
 
+## 📚 技術解説
+
+詳細な解説は `docs/` ディレクトリにあります。各コンポーネントの数学的な意味や設計の動機をまとめています。
+
+1. [01_tokenizer.md](docs/01_tokenizer.md): バイトレベル BPE と Unicode マッピング
+2. [02_attention.md](docs/02_attention.md): Multi-Head Attention と 因果マスキング
+3. [03_block.md](docs/03_block.md): Pre-LayerNorm と 残差接続
+4. [04_model_overall.md](docs/04_model_overall.md): 全体構成と 重み共有 (Weight Tying)
+
 ## 📁 ディレクトリ構成
 
 ```text
@@ -63,13 +72,6 @@ uv run python my_gpt2/generate.py こんにちは、私の名前は -n 50 -t 0.7
 - `-n`, `--n_tokens`: 生成するトークン数（デフォルト: 30）。
 - `-m`, `--model`: 使用するモデル ID またはパス（デフォルト: `openai-community/gpt2`）。
 - `-t`, `--temperature`: サンプリング温度。値を大きくすると多様性が増し、0 に近づけると決定的な生成になります（デフォルト: 1.0）。
-
-詳細な解説は `docs/` ディレクトリにあります。各コンポーネントの数学的な意味や設計の動機をまとめています。
-
-1. [01_tokenizer.md](docs/01_tokenizer.md): バイトレベル BPE と Unicode マッピング
-2. [02_attention.md](docs/02_attention.md): Multi-Head Attention と 因果マスキング
-3. [03_block.md](docs/03_block.md): Pre-LayerNorm と 残差接続
-4. [04_model_overall.md](docs/04_model_overall.md): 全体構成と 重み共有 (Weight Tying)
 
 ## 🧪 テスト
 各モジュールの正当性を確認するためにテストを実行できます。
