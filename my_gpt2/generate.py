@@ -1,11 +1,11 @@
 import numpy as np
-from transformers import AutoTokenizer
+from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.model import GPT2
 from my_gpt2.loader import load_gpt2_weights
 
 def generate(prompt, n_tokens_to_generate=10, model_id="openai-community/gpt2"):
-    # 1. Load tokenizer and weights
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    # 1. Load custom tokenizer and weights
+    tokenizer = Tokenizer()
     params = load_gpt2_weights(model_id)
     
     # 2. Initialize model

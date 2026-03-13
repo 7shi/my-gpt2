@@ -9,3 +9,5 @@ wheels/
 # Virtual environments
 .venv
 weights/
+weights/vocab.json
+weights/merges.txt
