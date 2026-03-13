@@ -23,14 +23,10 @@ def attention(q, k, v, mask=None):
     v: value (..., seq_len, head_size)
     mask: causal mask (seq_len, seq_len)
     """
-    # q @ k.T / sqrt(d_k)
-    # k is (..., seq_len, head_size), transpose it to (..., head_size, seq_len)
     d_k = q.shape[-1]
     scores = np.matmul(q, k.transpose(0, 1, 3, 2)) / np.sqrt(d_k)
     
     if mask is not None:
-        # mask is (seq_len, seq_len), where 1 means keep and 0 means mask out.
-        # fill 0s with a very large negative number
         scores = np.where(mask == 0, -1e10, scores)
     
     probs = softmax(scores)
@@ -39,10 +35,27 @@ def attention(q, k, v, mask=None):
 def mha(x, w_qkv, b_qkv, w_out, b_out, n_head):
     """
     Multi-Head Attention.
-    ... (rest of the docstring)
+    x: input tensor (batch_size, seq_len, embed_dim)
+    w_qkv: combined weights for q, k, v (embed_dim, 3 * embed_dim)
+    b_qkv: combined biases for q, k, v (3 * embed_dim)
+    w_out: output projection weights (embed_dim, embed_dim)
+    b_out: output projection bias (embed_dim)
+    n_head: number of attention heads
     """
-    # ... (rest of implementation)
-    # Output projection
+    batch_size, seq_len, embed_dim = x.shape
+    qkv = np.matmul(x, w_qkv) + b_qkv
+    
+    q, k, v = np.split(qkv, 3, axis=-1)
+    head_size = embed_dim // n_head
+    
+    def split_heads(tensor):
+        return tensor.reshape(batch_size, seq_len, n_head, head_size).transpose(0, 2, 1, 3)
+    
+    q, k, v = map(split_heads, [q, k, v])
+    mask = np.tril(np.ones((seq_len, seq_len)))
+    out = attention(q, k, v, mask=mask)
+    
+    out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
     return np.matmul(out, w_out) + b_out
 
 def mlp(x, w_fc, b_fc, w_proj, b_proj):
@@ -54,10 +67,23 @@ def mlp(x, w_fc, b_fc, w_proj, b_proj):
     w_proj: second linear layer weights (4 * embed_dim, embed_dim)
     b_proj: second linear layer bias (embed_dim)
     """
-    # Expansion (1D convolution equivalent in GPT-2 paper)
     a = gelu(np.matmul(x, w_fc) + b_fc)
-    # Contraction
     return np.matmul(a, w_proj) + b_proj
+
+class TransformerBlock:
+    """
+    GPT-2 Transformer Block.
+    """
+    def __init__(self, params, n_head):
+        self.params = params
+        self.n_head = n_head
+    
+    def __call__(self, x):
+        # Attention + Residual connection (Pre-LayerNorm)
+        x = x + mha(layer_norm(x, **self.params["ln_1"]), **self.params["attn"], n_head=self.n_head)
+        # MLP + Residual connection (Pre-LayerNorm)
+        x = x + mlp(layer_norm(x, **self.params["ln_2"]), **self.params["mlp"])
+        return x
 
 def layer_norm(x, g, b, eps=1e-5):
     """
