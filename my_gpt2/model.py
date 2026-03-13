@@ -39,39 +39,25 @@ def attention(q, k, v, mask=None):
 def mha(x, w_qkv, b_qkv, w_out, b_out, n_head):
     """
     Multi-Head Attention.
-    x: input tensor (batch_size, seq_len, embed_dim)
-    w_qkv: combined weights for q, k, v (embed_dim, 3 * embed_dim)
-    b_qkv: combined biases for q, k, v (3 * embed_dim)
-    w_out: output projection weights (embed_dim, embed_dim)
-    b_out: output projection bias (embed_dim)
-    n_head: number of attention heads
+    ... (rest of the docstring)
     """
-    batch_size, seq_len, embed_dim = x.shape
-    
-    # Linear transformation for Q, K, V
-    qkv = np.matmul(x, w_qkv) + b_qkv # (batch_size, seq_len, 3 * embed_dim)
-    
-    # Split Q, K, V and reshape to (batch_size, n_head, seq_len, head_size)
-    q, k, v = np.split(qkv, 3, axis=-1)
-    head_size = embed_dim // n_head
-    
-    def split_heads(tensor):
-        # (batch_size, seq_len, embed_dim) -> (batch_size, n_head, seq_len, head_size)
-        return tensor.reshape(batch_size, seq_len, n_head, head_size).transpose(0, 2, 1, 3)
-    
-    q, k, v = map(split_heads, [q, k, v])
-    
-    # Causal mask
-    mask = np.tril(np.ones((seq_len, seq_len)))
-    
-    # Core attention
-    out = attention(q, k, v, mask=mask) # (batch_size, n_head, seq_len, head_size)
-    
-    # Merge heads
-    out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
-    
+    # ... (rest of implementation)
     # Output projection
     return np.matmul(out, w_out) + b_out
+
+def mlp(x, w_fc, b_fc, w_proj, b_proj):
+    """
+    Feed Forward Network (MLP).
+    x: input tensor (batch_size, seq_len, embed_dim)
+    w_fc: first linear layer weights (embed_dim, 4 * embed_dim)
+    b_fc: first linear layer bias (4 * embed_dim)
+    w_proj: second linear layer weights (4 * embed_dim, embed_dim)
+    b_proj: second linear layer bias (embed_dim)
+    """
+    # Expansion (1D convolution equivalent in GPT-2 paper)
+    a = gelu(np.matmul(x, w_fc) + b_fc)
+    # Contraction
+    return np.matmul(a, w_proj) + b_proj
 
 def layer_norm(x, g, b, eps=1e-5):
     """
