@@ -36,6 +36,43 @@ def attention(q, k, v, mask=None):
     probs = softmax(scores)
     return np.matmul(probs, v)
 
+def mha(x, w_qkv, b_qkv, w_out, b_out, n_head):
+    """
+    Multi-Head Attention.
+    x: input tensor (batch_size, seq_len, embed_dim)
+    w_qkv: combined weights for q, k, v (embed_dim, 3 * embed_dim)
+    b_qkv: combined biases for q, k, v (3 * embed_dim)
+    w_out: output projection weights (embed_dim, embed_dim)
+    b_out: output projection bias (embed_dim)
+    n_head: number of attention heads
+    """
+    batch_size, seq_len, embed_dim = x.shape
+    
+    # Linear transformation for Q, K, V
+    qkv = np.matmul(x, w_qkv) + b_qkv # (batch_size, seq_len, 3 * embed_dim)
+    
+    # Split Q, K, V and reshape to (batch_size, n_head, seq_len, head_size)
+    q, k, v = np.split(qkv, 3, axis=-1)
+    head_size = embed_dim // n_head
+    
+    def split_heads(tensor):
+        # (batch_size, seq_len, embed_dim) -> (batch_size, n_head, seq_len, head_size)
+        return tensor.reshape(batch_size, seq_len, n_head, head_size).transpose(0, 2, 1, 3)
+    
+    q, k, v = map(split_heads, [q, k, v])
+    
+    # Causal mask
+    mask = np.tril(np.ones((seq_len, seq_len)))
+    
+    # Core attention
+    out = attention(q, k, v, mask=mask) # (batch_size, n_head, seq_len, head_size)
+    
+    # Merge heads
+    out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
+    
+    # Output projection
+    return np.matmul(out, w_out) + b_out
+
 def layer_norm(x, g, b, eps=1e-5):
     """
     Layer Normalization.
