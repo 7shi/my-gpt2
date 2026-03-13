@@ -54,14 +54,31 @@ return np.matmul(x, self.params["wte"].T)
 
 ```python
 # 実装の抜粋 (my_gpt2/generate.py)
-if temperature > 0:
-    # 温度でロジットをスケールし、確率分布からランダム選択
-    next_token_logits = next_token_logits / temperature
-    probs = softmax(next_token_logits)
-    next_token = int(np.random.choice(len(probs), p=probs))
-else:
-    # 最も確率が高いものを常に選択
-    next_token = int(np.argmax(next_token_logits))
+# 不完全なマルチバイト文字を扱うためのバッファ
+byte_buffer = bytearray()
+
+for _ in range(n_tokens_to_generate):
+    logits = model(inputs)
+    next_token_logits = logits[0, -1, :]
+    
+    # サンプリング
+    if temperature > 0:
+        probs = softmax(next_token_logits / temperature)
+        next_token = int(np.random.choice(len(probs), p=probs))
+    else:
+        next_token = int(np.argmax(next_token_logits))
+    
+    # バイト列として蓄積し、UTF-8として完成した文字から表示
+    token_str = tokenizer.decoder[next_token]
+    byte_buffer.extend([tokenizer.byte_decoder[c] for c in token_str])
+    try:
+        print(byte_buffer.decode("utf-8"), end="", flush=True)
+        byte_buffer.clear()
+    except UnicodeDecodeError as e:
+        valid_bytes = byte_buffer[:e.start]
+        if valid_bytes:
+            print(valid_bytes.decode("utf-8"), end="", flush=True)
+            del byte_buffer[:e.start]
 ```
 
 ### まとめ：推論の全プロセス
