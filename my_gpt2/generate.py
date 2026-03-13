@@ -82,7 +82,10 @@ def generate(prompt, n_tokens_to_generate=30, model_id="openai-community/gpt2", 
     return full_bytes.decode("utf-8", errors="ignore")
 
 def main():
-    parser = argparse.ArgumentParser(description="GPT-2 Scratch Inference with NumPy")
+    parser = argparse.ArgumentParser(
+        description="GPT-2 Scratch Inference with NumPy",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     # Position argument for prompt (one or more words)
     parser.add_argument("prompt", nargs="+", help="Prompt text to start generation")
     parser.add_argument("-n", "--n_tokens", type=int, default=30, help="Number of tokens to generate")
