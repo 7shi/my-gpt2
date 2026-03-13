@@ -1,9 +1,8 @@
 # my-gpt2: GPT-2 Scratch Implementation with NumPy
 
-このプロジェクトは、LLM（大規模言語モデル）のアーキテクチャを深く理解するために、[GPT-2](https://huggingface.co/openai-community/gpt2)（124Mモデル）をスクラッチで実装したものです。PyTorchやTensorFlowなどの深層学習フレームワークを使用せず、NumPyを使用してTransformerの仕組みを再現しています。
+このプロジェクトは、LLM（大規模言語モデル）のアーキテクチャを深く理解するために、[GPT-2](https://huggingface.co/openai-community/gpt2)（124Mモデル）の推論エンジンをスクラッチで実装したものです。PyTorchやTensorFlowなどの深層学習フレームワークを使用せず、NumPyによってTransformerの仕組みを再現しています。
 
-**約400行のPythonコード**で、トークナイザー、モデル本体、重みロード、文章生成までの全工程を完結させているのが特徴です。
-Gemini CLI を使い、Gemini 3 Flash Preview モデルとの対話を通じて約2時間で構築されました。
+**約400行のPythonコード**で、トークナイザー、モデル本体、重みロード、文章生成までの全工程を完結させているのが特徴です。Gemini CLI を使い、Gemini 3 Flash Preview モデルとの対話を通じて約2時間で構築されました。
 
 ## 🚀 主な特徴
 
