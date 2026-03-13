@@ -20,33 +20,52 @@ def generate(prompt, n_tokens_to_generate=30, model_id="openai-community/gpt2"):
     print("Generating: ", end="", flush=True)
     
     # 4. Generation loop
+    # Buffer for incomplete multi-byte characters
+    byte_buffer = bytearray()
+    
     for _ in range(n_tokens_to_generate):
         # Ensure we don't exceed the model's maximum position embedding
-        # GPT-2 default max_pos is 1024
         inputs = np.array([input_ids[-1024:]])
         
         # Forward pass
-        logits = model(inputs) # (1, seq_len, vocab_size)
-        
-        # Get the logits of the last token
-        next_token_logits = logits[0, -1, :]
-        
-        # Greedy search: take the token with max probability
-        next_token = int(np.argmax(next_token_logits))
+        logits = model(inputs)
+        next_token = int(np.argmax(logits[0, -1, :]))
         
         # Append to sequence
         input_ids.append(next_token)
         
-        # Print the newly generated token
-        print(tokenizer.decode([next_token]), end="", flush=True)
+        # Get raw bytes of the new token
+        token_str = tokenizer.decoder[next_token]
+        token_bytes = bytes([tokenizer.byte_decoder[c] for c in token_str])
+        byte_buffer.extend(token_bytes)
         
-        # Stop if we hit the end-of-text token (50256 for GPT-2)
+        # Try to decode the buffer as UTF-8
+        try:
+            # If the whole buffer is valid UTF-8
+            decoded_text = byte_buffer.decode("utf-8")
+            print(decoded_text, end="", flush=True)
+            byte_buffer.clear()
+        except UnicodeDecodeError as e:
+            # Decode only the valid part
+            valid_bytes = byte_buffer[:e.start]
+            if valid_bytes:
+                print(valid_bytes.decode("utf-8"), end="", flush=True)
+                # Keep the invalid part for the next token
+                del byte_buffer[:e.start]
+        
+        # Stop if we hit the end-of-text token (50256)
         if next_token == 50256:
             print("\n[End of text reached]")
             break
         
     print("\n\nFull output:")
-    return tokenizer.decode(input_ids)
+    # Final decode: ignore any incomplete multi-byte characters at the end
+    full_bytes = bytearray()
+    for tid in input_ids:
+        token_str = tokenizer.decoder[tid]
+        full_bytes.extend([tokenizer.byte_decoder[c] for c in token_str])
+    
+    return full_bytes.decode("utf-8", errors="ignore")
 
 def main():
     parser = argparse.ArgumentParser(description="GPT-2 Scratch Inference with NumPy")
