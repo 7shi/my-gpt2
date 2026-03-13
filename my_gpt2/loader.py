@@ -1,29 +1,18 @@
 import numpy as np
 from safetensors.numpy import load_file
-from huggingface_hub import hf_hub_download
 
-def load_gpt2_weights(model_id="openai-community/gpt2"):
+def load_gpt2_weights():
     """
-    Download and map GPT-2 safetensors to our params dictionary.
+    Load GPT-2 safetensors and map to our params dictionary.
+    Run `make download` first to get the weights.
     """
-    import os
-    # 1. Download model file to local weights directory
-    local_dir = "weights"
-    if not os.path.exists(os.path.join(local_dir, "model.safetensors")):
-        print(f"Downloading {model_id} weights to {local_dir}...")
-        file_path = hf_hub_download(
-            repo_id=model_id, 
-            filename="model.safetensors",
-            local_dir=local_dir
-        )
-    else:
-        file_path = os.path.join(local_dir, "model.safetensors")
-    
-    # 2. Load weights as numpy arrays
+    file_path = "weights/model.safetensors"
+
+    # 1. Load weights as numpy arrays
     print(f"Loading weights from {file_path} into memory...")
     weights = load_file(file_path)
     
-    # 3. Map to our params structure
+    # 2. Map to our params structure
     prefix = "transformer." if "transformer.wte.weight" in weights else ""
     
     params = {
