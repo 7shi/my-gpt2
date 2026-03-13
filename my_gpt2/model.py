@@ -85,6 +85,31 @@ class TransformerBlock:
         x = x + mlp(layer_norm(x, **self.params["ln_2"]), **self.params["mlp"])
         return x
 
+class GPT2:
+    """
+    GPT-2 Model.
+    """
+    def __init__(self, params, n_head):
+        self.params = params
+        self.blocks = [TransformerBlock(p, n_head) for p in params["blocks"]]
+    
+    def __call__(self, input_ids):
+        # input_ids: (batch_size, seq_len)
+        # Token + Position Embeddings
+        # wte: (vocab_size, embed_dim), wpe: (max_pos, embed_dim)
+        x = self.params["wte"][input_ids] + self.params["wpe"][np.arange(input_ids.shape[1])]
+        
+        # Transformer Blocks
+        for block in self.blocks:
+            x = block(x)
+        
+        # Final LayerNorm
+        x = layer_norm(x, **self.params["ln_f"])
+        
+        # Language Model Head (Weight Tying)
+        # Project back to vocab_size: (batch_size, seq_len, vocab_size)
+        return np.matmul(x, self.params["wte"].T)
+
 def layer_norm(x, g, b, eps=1e-5):
     """
     Layer Normalization.
