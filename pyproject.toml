@@ -3,6 +3,7 @@ name = "my-gpt2"
 version = "0.1.0"
 description = "GPT-2 implementation from scratch using NumPy"
 readme = "README.md"
+repository = "https://github.com/7shi/my-gpt2"
 requires-python = ">=3.13"
 dependencies = [
     "numpy>=2.4.3",
