@@ -20,5 +20,8 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[project.scripts]
+my-gpt2 = "my_gpt2.generate:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["my_gpt2"]

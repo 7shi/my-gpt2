@@ -61,10 +61,7 @@ make run
 または、詳細なオプションを指定して実行します。
 ```bash
 # 基本的な実行
-uv run python my_gpt2/generate.py Once upon a time
-
-# 日本語プロンプト、トークン数、温度の指定
-uv run python my_gpt2/generate.py こんにちは、私の名前は -n 50 -t 0.7
+uv run my-gpt2 "Once upon a time"
 ```
 
 #### 主なオプション:
@@ -87,7 +84,7 @@ uv run pytest
 指示に従う訓練（Instruct）を受けていないモデルでも、「対話の記録」というパターンを模したプロンプトを渡すことで、アシスタントのように振る舞わせることができます。
 
 ```bash
-uv run python my_gpt2/generate.py "User: Hello!
+uv run my-gpt2 "User: Hello!
 Assistant: Hello! How can I help you today?
 User: What is the capital of France?
 Assistant:" -n 5
@@ -97,21 +94,21 @@ Assistant:" -n 5
 「AはBである。ならばCはDである」という推論能力（アナロジー）を利用します。文章を途中で止めることで、モデルが持つ知識を自然な形で引き出すことができます。
 
 ```bash
-uv run python my_gpt2/generate.py "The capital of Japan is Tokyo. The capital of France is" -n 5
+uv run my-gpt2 "The capital of Japan is Tokyo. The capital of France is" -n 5
 ```
 
 ### 3. 執筆の呼び水・ダミーテキスト生成
 物語や記事の書き出しを渡し、温度（Temperature）を調整することで、多様なアイデアを生成させることができます。
 
 ```bash
-uv run python my_gpt2/generate.py "Once upon a time" -n 50 -t 0.8
+uv run my-gpt2 "Once upon a time" -n 50 -t 0.8
 ```
 
 ### 4. 日本語での活用
 英語ベースのモデルですが、Byte-level BPE により日本語の入力も可能です。文法的な正しさは保証されませんが、技術的なデモとして短い文章の続きを生成させることができます。
 
 ```bash
-uv run python my_gpt2/generate.py "昔々あるところに" -n 20 -t 0.7
+uv run my-gpt2 "昔々あるところに" -n 20 -t 0.7
 ```
 
 ---

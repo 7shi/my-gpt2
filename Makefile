@@ -25,7 +25,7 @@ download:
 	@echo "Download complete."
 
 run:
-	@uv run my_gpt2/generate.py "The quick brown fox" -n 20
+	@uv run my-gpt2 "The quick brown fox" -n 20
 
 clean:
 	rm -rf $(WEIGHTS_DIR)

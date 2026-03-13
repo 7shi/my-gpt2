@@ -1,9 +1,9 @@
 import numpy as np
 import argparse
-from my_gpt2.tokenizer import Tokenizer
-from my_gpt2.model import GPT2
-from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import softmax
+from .tokenizer import Tokenizer
+from .model import GPT2
+from .loader import load_gpt2_weights
+from .model import softmax
 
 def generate(prompt, n_tokens_to_generate=30, temperature=1.0):
     # 1. Load custom tokenizer and weights
