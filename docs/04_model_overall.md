@@ -36,6 +36,43 @@ return np.matmul(x, self.params["wte"].T)
 
 ---
 
+### 3. 自己回帰的な推論 (Generation) とサンプリング
+
+推論時には、この出力の最後尾（最新の単語）の確率分布から次のトークンを選択し、それを再び入力に追加して推論を繰り返します（自己回帰）。
+
+#### サンプリング手法：Greedy vs Temperature
+トークンを選択する手法には主に以下の 2 つがあります：
+
+1. **Greedy Search (Temperature = 0)**:
+   常に最も確率が高いトークンを 1 つだけ選びます。
+   - **特徴**: 決定的で一貫性がありますが、文章が長くなると同じフレーズを繰り返す「ループ現象」が発生しやすくなります。
+
+2. **Temperature Sampling (Temperature > 0)**:
+   ソフトマックスを適用する前のロジットを温度 $T$ で割り、分布を変形させてからランダムにサンプリングします。
+   - **低温度 (T < 1.0)**: 確率の高いトークンに集中し、保守的で安全な生成になります。
+   - **高温度 (T > 1.0)**: 確率の低いトークンにもチャンスを与え、多様で創造的な（時には支離滅裂な）生成になります。
+
+```python
+# 実装の抜粋 (my_gpt2/generate.py)
+if temperature > 0:
+    # 温度でロジットをスケールし、確率分布からランダム選択
+    next_token_logits = next_token_logits / temperature
+    probs = softmax(next_token_logits)
+    next_token = int(np.random.choice(len(probs), p=probs))
+else:
+    # 最も確率が高いものを常に選択
+    next_token = int(np.argmax(next_token_logits))
+```
+
+### まとめ：推論の全プロセス
+1.  テキストをトークナイザーで数値(ID)化。
+2.  Embeddingでベクトル化し、位置情報を足す。
+3.  複数の Transformer Block を通して文脈を深める。
+4.  Weight Tying を使って語彙確率に変換。
+5.  サンプリング手法（温度）を用いて次の単語を決定し、再び入力へ。
+
+---
+
 ### 設計の動機：なぜ位置ベクトル (WPE) を「足す」のか？
 
 Attention機構は、入力がどんな順番で並んでいても同じ結果を計算してしまいます（順序不変性）。

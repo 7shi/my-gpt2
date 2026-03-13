@@ -42,17 +42,25 @@ make download
 ```
 
 ### 3. 文章生成の実行
-デフォルトのプロンプトで推論を開始します。
+プロンプトを位置引数として指定して実行します。
 
 ```bash
 make run
 ```
-または、任意のプロンプトを指定して実行します。
+または、詳細なオプションを指定して実行します。
 ```bash
-uv run python my_gpt2/generate.py "Artificial intelligence is"
+# 基本的な実行
+uv run python my_gpt2/generate.py Once upon a time
+
+# 日本語プロンプト、トークン数、温度の指定
+uv run python my_gpt2/generate.py こんにちは、私の名前は -n 50 -t 0.7
 ```
 
-## 📚 技術解説
+#### 主なオプション:
+- `prompt` (位置引数): 生成を開始するテキスト。
+- `-n`, `--n_tokens`: 生成するトークン数（デフォルト: 30）。
+- `-m`, `--model`: 使用するモデル ID またはパス（デフォルト: `openai-community/gpt2`）。
+- `-t`, `--temperature`: サンプリング温度。値を大きくすると多様性が増し、0 に近づけると決定的な生成になります（デフォルト: 1.0）。
 
 詳細な解説は `docs/` ディレクトリにあります。各コンポーネントの数学的な意味や設計の動機をまとめています。
 

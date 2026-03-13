@@ -3,8 +3,9 @@ import argparse
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.model import GPT2
 from my_gpt2.loader import load_gpt2_weights
+from my_gpt2.model import softmax
 
-def generate(prompt, n_tokens_to_generate=30, model_id="openai-community/gpt2"):
+def generate(prompt, n_tokens_to_generate=30, model_id="openai-community/gpt2", temperature=1.0):
     # 1. Load custom tokenizer and weights
     tokenizer = Tokenizer()
     params = load_gpt2_weights(model_id)
@@ -17,6 +18,7 @@ def generate(prompt, n_tokens_to_generate=30, model_id="openai-community/gpt2"):
     input_ids = tokenizer.encode(prompt)
     
     print(f"\nPrompt: '{prompt}'")
+    print(f"Temperature: {temperature}")
     print("Generating: ", end="", flush=True)
     
     # 4. Generation loop
@@ -29,7 +31,19 @@ def generate(prompt, n_tokens_to_generate=30, model_id="openai-community/gpt2"):
         
         # Forward pass
         logits = model(inputs)
-        next_token = int(np.argmax(logits[0, -1, :]))
+        
+        # Get the logits of the last token
+        next_token_logits = logits[0, -1, :]
+        
+        # Apply temperature
+        if temperature > 0:
+            # Scale logits and use random sampling
+            next_token_logits = next_token_logits / temperature
+            probs = softmax(next_token_logits)
+            next_token = int(np.random.choice(len(probs), p=probs))
+        else:
+            # Greedy search if temperature is 0
+            next_token = int(np.argmax(next_token_logits))
         
         # Append to sequence
         input_ids.append(next_token)
@@ -73,13 +87,14 @@ def main():
     parser.add_argument("prompt", nargs="+", help="Prompt text to start generation")
     parser.add_argument("-n", "--n_tokens", type=int, default=30, help="Number of tokens to generate")
     parser.add_argument("-m", "--model", type=str, default="openai-community/gpt2", help="Model ID or local path")
+    parser.add_argument("-t", "--temperature", type=float, default=1.0, help="Sampling temperature (lower is more deterministic)")
     
     args = parser.parse_args()
     
     # Join the prompt words with space
     prompt_text = " ".join(args.prompt)
     
-    output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, model_id=args.model)
+    output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, model_id=args.model, temperature=args.temperature)
     print(output)
 
 if __name__ == "__main__":
