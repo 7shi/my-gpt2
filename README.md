@@ -65,19 +65,27 @@ make download-rinna    # rinna/japanese-gpt2-small のみ
 ```
 
 ### 3. 文章生成の実行
-プロンプトを位置引数として指定して実行します。
+プロンプトを引数として指定して実行します。デフォルトは GPT-2 モデルです。
 
 ```bash
-make run
-```
-または、詳細なオプションを指定して実行します。
-```bash
-# 英語（openai-community/gpt2、デフォルト）
 uv run my-gpt2 "Once upon a time"
-
-# 日本語（rinna/japanese-gpt2-small）
-uv run my-gpt2 -m rinna/japanese-gpt2-small "吾輩は猫である"
 ```
+> Once upon a time when no one could make impressions many people wished they had touched others who did.
+> They stayed and drifted. Many don't even remember for years. One
+
+英語ベースの GPT-2 は Byte-level BPE により日本語を受け付けますが、日本語として意味の通じる文章は生成できません。日本語の断片や記号が混在した出力になります。
+
+```bash
+uv run my-gpt2 -n 20 "吾輩は猫で"
+```
+> 吾輩は猫で自己のファンメイルに猫て是 ignored
+
+日本語で意味の通じる文章を生成するには `rinna/japanese-gpt2-small` を使用してください。
+
+```bash
+uv run my-gpt2 -n 20 -m rinna/japanese-gpt2-small "吾輩は猫で"
+```
+> 吾輩は猫で、子に親切にもした。 楽しげな娘を見るたびに、亡き妻が生きて
 
 #### 主なオプション:
 - `prompt` (位置引数): 生成を開始するテキスト。
@@ -100,55 +108,50 @@ uv run pytest
 指示に従う訓練（Instruct）を受けていないモデルでも、「対話の記録」というパターンを模したプロンプトを渡すことで、アシスタントのように振る舞わせることができます。
 
 ```bash
-# 英語
 uv run my-gpt2 -n 5 "User: Hello!
 Assistant: Hello! How can I help you today?
 User: What is the capital of France?
 Assistant:"
+```
+> (snip)  
+> Assistant: Mind the capital of France
 
-# 日本語
-# rinna の語彙には改行が含まれないため、改行の代わりに * を使用する。
-# * はモデルが区切り記号として学習しており、生成結果にも自然に現れる。
-# 全角の！？も語彙外のため半角を使用する。
+rinna の語彙には改行が含まれないため、ここでは改行の代わりに `*` を使用します。全角の `！？` も語彙外のため半角を使用します。
+
+```bash
 uv run my-gpt2 -n 10 -m rinna/japanese-gpt2-small "ユーザー: こんにちは!*アシスタント: こんにちは! 何かお手伝いできますか?*ユーザー: 日本の首都はどこですか?*アシスタント:"
 ```
+> （略）  
+> アシスタント: 日本はどのくらい日本と呼ばれますか?*
 
 ### 2. パターンによる知識抽出（Analogy）
 「AはBである。ならばCはDである」という推論能力（アナロジー）を利用します。文章を途中で止めることで、モデルが持つ知識を自然な形で引き出すことができます。
 
 ```bash
-# 英語
 uv run my-gpt2 -n 5 "The capital of Japan is Tokyo. The capital of France is"
+```
+> The capital of Japan is Tokyo. The capital of France is Paris. The capital of
 
-# 日本語
+```bash
 uv run my-gpt2 -n 5 -m rinna/japanese-gpt2-small "日本の首都は東京です。フランスの首都は"
 ```
+> 日本の首都は東京です。フランスの首都はヴェルサイユですが、いつも
 
-### 3. GPT-2 への日本語入力
-英語ベースの GPT-2 は Byte-level BPE により日本語を受け付けますが、日本語として意味の通じる文章は生成できません。日本語の断片や記号が混在した出力になります。
-
-```bash
-uv run my-gpt2 -n 20 "吾輩は猫である"
-# → 吾輩は猫であることは何有能はならな...‰…Gya,
-```
-
-日本語で意味の通じる文章を生成するには `rinna/japanese-gpt2-small` を使用してください。
-
-```bash
-uv run my-gpt2 -n 20 -m rinna/japanese-gpt2-small "吾輩は猫である"
-# → 吾輩は猫である! というキャッチコピーに反応し、アマゾンで回答をしたため、ゾンビに見せかけた酒を
-```
-
-### 4. 執筆の呼び水・ダミーテキスト生成
+### 3. 執筆の呼び水・ダミーテキスト生成
 物語や記事の書き出しを渡し、温度（Temperature）を調整することで、多様なアイデアを生成させることができます。
 
 ```bash
-# 英語
 uv run my-gpt2 -n 50 -t 0.8 "Once upon a time"
+```
+> Once upon a time they understood what the situation was, that he had to survive.
+> So after being raised as a captive by his own father, he and his family lived a few years of
+> isolation and isolation on a deserted island. It wasn't until he met
 
-# 日本語
+```bash
 uv run my-gpt2 -n 50 -t 0.8 -m rinna/japanese-gpt2-small "昔々あるところに"
 ```
+> 昔々あるところに、鳥が通り過ぎる。 いつもやってくる。 と。 変だわー、いろいろあってみじめに
+> 感じるこの頃のことだ。 やっぱりどこかで見たような表情をしている。 その隣の小さな池が大沼
 
 ---
 LLM の内部で何が起きているのかを、コードを通じて学ぶためのリポジトリです。
