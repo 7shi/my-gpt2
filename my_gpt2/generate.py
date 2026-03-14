@@ -7,20 +7,20 @@ from .model import GPT2
 from .loader import load_gpt2_weights
 from .model import softmax
 
-def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p=None, model_id="openai-community/gpt2", verbose=False):
-    # 1. トークナイザーと重みを読み込む
-    spiece_path = f"weights/{model_id}/spiece.model"
-    if os.path.exists(spiece_path):
-        tokenizer = SentencePieceTokenizer(model_id)
-    else:
-        tokenizer = Tokenizer(model_id)
-    params = load_gpt2_weights(model_id, verbose=verbose)
+def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p=None, model_id="openai-community/gpt2", verbose=False, *, model=None, tokenizer=None):
+    # 1. トークナイザーと重みを読み込む（未指定時）
+    if tokenizer is None:
+        spiece_path = f"weights/{model_id}/spiece.model"
+        if os.path.exists(spiece_path):
+            tokenizer = SentencePieceTokenizer(model_id)
+        else:
+            tokenizer = Tokenizer(model_id)
+    if model is None:
+        params = load_gpt2_weights(model_id, verbose=verbose)
+        # GPT-2 small（124M）は12ヘッド
+        model = GPT2(params, n_head=12)
 
-    # 2. モデルを初期化
-    # GPT-2 small（124M）は12ヘッド
-    model = GPT2(params, n_head=12)
-
-    # 3. 入力をトークン化
+    # 2. 入力をトークン化
     input_ids = tokenizer.encode(prompt)
 
     if verbose:
@@ -30,7 +30,7 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p
     else:
         print(tokenizer.decode(input_ids), end="", flush=True)
 
-    # 4. 生成ループ
+    # 3. 生成ループ
     # マルチバイト文字の途中で切れた場合のバッファ
     byte_buffer = bytearray()
 
@@ -128,14 +128,25 @@ def main():
     parser.add_argument("-k", "--top_k", type=int, default=None, help="top-k サンプリング（上位k個のトークンから選択）")
     parser.add_argument("-p", "--top_p", type=float, default=None, help="top-p サンプリング（累積確率p以内のトークンから選択）")
     parser.add_argument("-m", "--model", default="openai-community/gpt2", help="モデルID（例: openai-community/gpt2）")
+    parser.add_argument("-r", "--repeat", type=int, default=1, help="同じプロンプトを繰り返す回数")
     parser.add_argument("-v", "--verbose", action="store_true", help="詳細な情報を表示する")
 
     args = parser.parse_args()
 
+    # モデルとトークナイザーを一度だけ読み込む
+    spiece_path = f"weights/{args.model}/spiece.model"
+    if os.path.exists(spiece_path):
+        tokenizer = SentencePieceTokenizer(args.model)
+    else:
+        tokenizer = Tokenizer(args.model)
+    params = load_gpt2_weights(args.model, verbose=args.verbose)
+    model = GPT2(params, n_head=12)
+
     for prompt_text in args.prompt:
-        output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, top_k=args.top_k, top_p=args.top_p, model_id=args.model, verbose=args.verbose)
-        if args.verbose:
-            print(output)
+        for _ in range(args.repeat):
+            output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, top_k=args.top_k, top_p=args.top_p, model_id=args.model, verbose=args.verbose, model=model, tokenizer=tokenizer)
+            if args.verbose:
+                print(output)
 
 if __name__ == "__main__":
     main()

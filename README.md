@@ -102,6 +102,7 @@ uv run my-gpt2 -n 20 -m rinna/japanese-gpt2-small "吾輩は猫で"
 - `-k`, `--top_k`: Top-k サンプリング。確率上位 k 個のトークンのみを候補にします（デフォルト: なし）。
 - `-p`, `--top_p`: Top-p サンプリング（Nucleus Sampling）。累積確率が p に達するまでのトークンを候補にします（デフォルト: なし）。
 - `-m`, `--model`: モデルID（デフォルト: `openai-community/gpt2`、例: `rinna/japanese-gpt2-small`）。
+- `-r`, `--repeat`: 同じプロンプトを繰り返す回数（デフォルト: 1）。サンプリングのばらつきを確認するのに便利です。
 
 ## 🧪 テスト
 各モジュールの正当性を確認するためにテストを実行できます。
@@ -142,10 +143,16 @@ uv run my-gpt2 -n 5 "The capital of Japan is Tokyo. The capital of France is"
 ```
 > The capital of Japan is Tokyo. The capital of France is Paris. The capital of
 
+`-r` で同じプロンプトを複数回評価し、サンプリングのばらつきを確認できます。
+
 ```bash
-uv run my-gpt2 -n 5 -m rinna/japanese-gpt2-small "日本の首都は東京です。フランスの首都は"
+uv run my-gpt2 -r 5 -t 0.8 -n 5 -m rinna/japanese-gpt2-small "日本の首都は東京です。中国の首都は"
 ```
-> 日本の首都は東京です。フランスの首都はヴェルサイユですが、いつも
+> 日本の首都は東京です。中国の首都は北京、インドの首都デリー  
+> 日本の首都は東京です。中国の首都は、やはり日本の首都です  
+> 日本の首都は東京です。中国の首都は、上海(hua  
+> 日本の首都は東京です。中国の首都は北京と北京です。  
+> 日本の首都は東京です。中国の首都は北京ですが、東京
 
 ### 3. 執筆の呼び水・ダミーテキスト生成
 物語や記事の書き出しを渡し、温度（Temperature）を調整することで、多様なアイデアを生成させることができます。
