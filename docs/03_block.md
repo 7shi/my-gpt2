@@ -15,10 +15,10 @@ GPT-2の特徴的な設計の一つに、**LayerNorm (LN)** を各処理（Atten
 class TransformerBlock:
     def __call__(self, x):
         # Attention + 残差接続 (Pre-LayerNorm)
-        x = x + mha(layer_norm(x, **self.params["ln_1"]), **self.params["attn"], n_head=self.n_head)
+        x = x + mha(layer_norm(x, self.params.ln_1), self.params.attn, n_head=self.n_head)
 
         # MLP + 残差接続 (Pre-LayerNorm)
-        x = x + mlp(layer_norm(x, **self.params["ln_2"]), **self.params["mlp"])
+        x = x + mlp(layer_norm(x, self.params.ln_2), self.params.mlp)
         return x
 ```
 
@@ -57,11 +57,11 @@ GELU(x) ≈ 0.5 × x × (1 + tanh(√(2/π) × (x + 0.044715 × x³)))
 ```
 
 ```python
-def mlp(x, w_fc, b_fc, w_proj, b_proj):
+def mlp(x, params: MLPParams):
     # a: 768次元から3072次元へ (x @ w_fc + b_fc)
-    a = gelu(np.matmul(x, w_fc) + b_fc)
+    a = gelu(np.matmul(x, params.w_fc) + params.b_fc)
     # 3072次元から768次元に戻す
-    return np.matmul(a, w_proj) + b_proj
+    return np.matmul(a, params.w_proj) + params.b_proj
 ```
 
 ### 設計の動機：なぜ MLP で次元を 4倍にするのか？

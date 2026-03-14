@@ -1,4 +1,38 @@
 import numpy as np
+from dataclasses import dataclass
+
+@dataclass
+class LayerNormParams:
+    g: np.ndarray
+    b: np.ndarray
+
+@dataclass
+class AttentionParams:
+    w_qkv: np.ndarray
+    b_qkv: np.ndarray
+    w_out: np.ndarray
+    b_out: np.ndarray
+
+@dataclass
+class MLPParams:
+    w_fc: np.ndarray
+    b_fc: np.ndarray
+    w_proj: np.ndarray
+    b_proj: np.ndarray
+
+@dataclass
+class BlockParams:
+    ln_1: LayerNormParams
+    attn: AttentionParams
+    ln_2: LayerNormParams
+    mlp: MLPParams
+
+@dataclass
+class GPT2Params:
+    wte: np.ndarray
+    wpe: np.ndarray
+    ln_f: LayerNormParams
+    blocks: list[BlockParams]
 
 def gelu(x):
     """
@@ -32,18 +66,15 @@ def attention(q, k, v, mask=None):
     probs = softmax(scores)
     return np.matmul(probs, v)
 
-def mha(x, w_qkv, b_qkv, w_out, b_out, n_head):
+def mha(x, params: AttentionParams, n_head):
     """
     マルチヘッドアテンション。
     x: 入力テンソル (batch_size, seq_len, embed_dim)
-    w_qkv: q, k, v の結合重み (embed_dim, 3 * embed_dim)
-    b_qkv: q, k, v の結合バイアス (3 * embed_dim)
-    w_out: 出力射影の重み (embed_dim, embed_dim)
-    b_out: 出力射影のバイアス (embed_dim)
+    params: AttentionParams (w_qkv, b_qkv, w_out, b_out)
     n_head: アテンションヘッド数
     """
     batch_size, seq_len, embed_dim = x.shape
-    qkv = np.matmul(x, w_qkv) + b_qkv
+    qkv = np.matmul(x, params.w_qkv) + params.b_qkv
 
     q, k, v = np.split(qkv, 3, axis=-1)
     head_size = embed_dim // n_head
@@ -56,70 +87,66 @@ def mha(x, w_qkv, b_qkv, w_out, b_out, n_head):
     out = attention(q, k, v, mask=mask)
 
     out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
-    return np.matmul(out, w_out) + b_out
+    return np.matmul(out, params.w_out) + params.b_out
 
-def mlp(x, w_fc, b_fc, w_proj, b_proj):
+def mlp(x, params: MLPParams):
     """
     フィードフォワードネットワーク（MLP）。
     x: 入力テンソル (batch_size, seq_len, embed_dim)
-    w_fc: 第1線形層の重み (embed_dim, 4 * embed_dim)
-    b_fc: 第1線形層のバイアス (4 * embed_dim)
-    w_proj: 第2線形層の重み (4 * embed_dim, embed_dim)
-    b_proj: 第2線形層のバイアス (embed_dim)
+    params: MLPParams (w_fc, b_fc, w_proj, b_proj)
     """
-    a = gelu(np.matmul(x, w_fc) + b_fc)
-    return np.matmul(a, w_proj) + b_proj
+    a = gelu(np.matmul(x, params.w_fc) + params.b_fc)
+    return np.matmul(a, params.w_proj) + params.b_proj
 
 class TransformerBlock:
     """
     GPT-2 トランスフォーマーブロック。
     """
-    def __init__(self, params, n_head):
+    def __init__(self, params: BlockParams, n_head):
         self.params = params
         self.n_head = n_head
 
     def __call__(self, x):
         # アテンション + 残差接続（Pre-LayerNorm）
-        x = x + mha(layer_norm(x, **self.params["ln_1"]), **self.params["attn"], n_head=self.n_head)
+        x = x + mha(layer_norm(x, self.params.ln_1), self.params.attn, n_head=self.n_head)
         # MLP + 残差接続（Pre-LayerNorm）
-        x = x + mlp(layer_norm(x, **self.params["ln_2"]), **self.params["mlp"])
+        x = x + mlp(layer_norm(x, self.params.ln_2), self.params.mlp)
         return x
 
 class GPT2:
     """
     GPT-2 モデル。
     """
-    def __init__(self, params, n_head):
+    def __init__(self, params: GPT2Params, n_head):
         self.params = params
-        self.blocks = [TransformerBlock(p, n_head) for p in params["blocks"]]
+        self.blocks = [TransformerBlock(p, n_head) for p in params.blocks]
 
     def __call__(self, input_ids):
         # input_ids: (batch_size, seq_len)
         # トークン埋め込み + 位置埋め込み
         # wte: (vocab_size, embed_dim), wpe: (max_pos, embed_dim)
-        x = self.params["wte"][input_ids] + self.params["wpe"][np.arange(input_ids.shape[1])]
+        x = self.params.wte[input_ids] + self.params.wpe[np.arange(input_ids.shape[1])]
 
         # トランスフォーマーブロック
         for block in self.blocks:
             x = block(x)
 
         # 最終LayerNorm
-        x = layer_norm(x, **self.params["ln_f"])
+        x = layer_norm(x, self.params.ln_f)
 
         # 言語モデルヘッド（重み共有）
         # 語彙サイズに射影: (batch_size, seq_len, vocab_size)
-        return np.matmul(x, self.params["wte"].T)
+        return np.matmul(x, self.params.wte.T)
 
-def layer_norm(x, g, b, eps=1e-5):
+def layer_norm(x, params: LayerNormParams, eps=1e-5):
     """
     レイヤー正規化。
     x: 入力配列
-    g: ゲイン（ガンマ）パラメータ
-    b: バイアス（ベータ）パラメータ
+    params: LayerNormParams (g: ゲイン（ガンマ）、b: バイアス（ベータ）)
     """
     mean = np.mean(x, axis=-1, keepdims=True)
     variance = np.var(x, axis=-1, keepdims=True)
-    return g * (x - mean) / np.sqrt(variance + eps) + b
+    return params.g * (x - mean) / np.sqrt(variance + eps) + params.b
 
 def main():
     print("GPT-2の基本関数が実装されています。")

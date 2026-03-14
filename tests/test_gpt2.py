@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from my_gpt2.model import gelu, softmax, layer_norm
+from my_gpt2.model import gelu, softmax, layer_norm, LayerNormParams
 
 def test_gelu():
     # GELU(x) ≈ 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))
@@ -24,10 +24,9 @@ def test_softmax():
 def test_layer_norm():
     x = np.random.randn(10, 768) # 768はGPT-2 smallの埋め込みサイズ
     # GPT-2では g（ガンマ）と b（ベータ）がパラメータ
-    g = np.ones(768)
-    b = np.zeros(768)
+    params = LayerNormParams(g=np.ones(768), b=np.zeros(768))
 
-    out = layer_norm(x, g, b)
+    out = layer_norm(x, params)
 
     # レイヤー正規化後、最終軸方向の平均は約0、標準偏差は約1になるはず
     assert np.allclose(np.mean(out, axis=-1), 0.0, atol=1e-5)
