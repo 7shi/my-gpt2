@@ -8,12 +8,21 @@ Transformer Blockを積み上げた後、モデルがどのようにして最終
 
 入力されたトークンID（整数）をベクトルに変換します。GPT-2では、単語の意味と位置の2つのベクトルを足し合わせます。
 
+GPT-2 small の Embedding 行列の形は次のとおりです。
+
+```
+WTE: (50257, 768)   # 語彙数 × embed_dim  （Word Token Embedding）
+WPE: (1024,  768)   # 最大シーケンス長 × embed_dim  （Word Position Embedding）
+```
+
+WTE でトークンIDを768次元のベクトルに変換し、WPE で位置ベクトルを加算します。
+
 ```python
 def __call__(self, input_ids):
     # wte: Word Token Embedding (語彙のベクトル化)
     # wpe: Word Position Embedding (位置情報の付加)
     x = self.params["wte"][input_ids] + self.params["wpe"][np.arange(input_ids.shape[1])]
-    
+
     # 多数の Transformer Block を通過
     for block in self.blocks:
         x = block(x)
@@ -41,9 +50,9 @@ return np.matmul(x, self.params["wte"].T)
 
 ### 設計の動機：なぜ重み共有 (Weight Tying) をするのか？
 
-1. **セマンティックな一貫性**: 
+1. **セマンティックな一貫性**:
    「単語 $A$ を表現するベクトル」と「次の単語として $A$ を予測するベクトル」は、本質的に同じ意味空間にあるべきです。同じ重みを使うことで、単語の類似性が予測にも直接反映されます。
-2. **圧倒的な節約**: 
+2. **圧倒的な節約**:
    GPT-2 (small) のパラメータ数 124M のうち、Embedding 行列だけで約 38M (約30%) を占めます。これを共有することで、モデルの精度を保ったままメモリ使用量を劇的に削減できます。
 
 ---
@@ -53,6 +62,17 @@ return np.matmul(x, self.params["wte"].T)
 推論時には、この出力の最後尾（最新の単語）の確率分布から次のトークンを選択し、それを再び入力に追加して推論を繰り返します（自己回帰）。
 
 ### サンプリング手法：Greedy vs Temperature
+
+**ロジット（logit）**とは Softmax を適用する前の生のスコアのことです。Temperature サンプリングでは、ロジットを温度 $T$ で割ることで確率分布の「尖り具合」を調整します。
+
+ロジット例 `[2.0, 1.0, 0.5]` に対してTemperatureを変えた場合の変化を示します。
+
+```
+T=1.0 （通常）: ロジット [2.0, 1.0, 0.5]  → softmax → [0.59, 0.24, 0.17]
+T=0.5 （集中）: ÷0.5 → [4.0, 2.0, 1.0]  → softmax → [0.84, 0.11, 0.05]
+T=2.0 （平坦）: ÷2.0 → [1.0, 0.5, 0.25] → softmax → [0.46, 0.34, 0.20]
+```
+
 トークンを選択する手法には主に以下の 2 つがあります：
 
 1. **Greedy Search (Temperature = 0)**:
