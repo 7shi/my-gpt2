@@ -25,6 +25,16 @@
 4. [04_model_overall.md](docs/04_model_overall.md): 全体構成と 重み共有 (Weight Tying)
 5. [05_spiece.md](docs/05_spiece.md): SentencePiece トークナイザー（ユニグラムモデル）
 
+## 🧪 実験と体験 (Experiments)
+
+実際の重みを使って、GPT-2 の内部でデータがどのように変化していくかを段階的に体験できるスクリプトと解説です。
+
+1. [01_embedding.md](experiments/01_embedding.md): 単語をベクトル空間の座標にする
+2. [02_contextual_embedding.md](experiments/02_contextual_embedding.md): 文脈によって座標を動的に変化させる
+3. [03_attention.md](experiments/03_attention.md): 情報を吸い込むための「検索（Q, K, V）」
+4. [04_block.md](experiments/04_block.md): 情報を積み重ね、高次元で「深掘り（MLP）」する
+5. [05_generation.md](experiments/05_generation.md): 最も自然な単語を「確率」で選び出す
+
 ## 🔍 GPT-2 の位置づけ
 
 GPT-2（124M パラメータ）の生成結果を見ると、文法的な整合性はあるものの意味の一貫性は低く、実用には程遠い印象を受けます。しかしそれは問題ではなく、むしろ GPT-2 はその「途中段階」を記録した歴史的なモデルです。
@@ -49,6 +59,7 @@ my-gpt2/
 │   └── rinna/
 │       └── japanese-gpt2-small/   # make download-rinna で生成
 ├── docs/             # 技術解説ドキュメント (01〜05)
+├── experiments/      # 実験と体験用スクリプト (01〜05)
 ├── tests/            # ユニットテスト
 ├── Makefile          # セットアップと実行の自動化
 └── pyproject.toml    # プロジェクト設定 (hatchling)
