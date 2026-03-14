@@ -1,7 +1,7 @@
 import numpy as np
 from safetensors.numpy import load_file
 
-def load_gpt2_weights(model_id="openai-community/gpt2"):
+def load_gpt2_weights(model_id="openai-community/gpt2", verbose=False):
     """
     GPT-2のsafetensorsを読み込み、paramsディクショナリにマッピングする。
     事前に `make download` を実行して重みファイルを取得してください。
@@ -9,7 +9,8 @@ def load_gpt2_weights(model_id="openai-community/gpt2"):
     file_path = f"weights/{model_id}/model.safetensors"
 
     # 1. 重みをnumpy配列として読み込む
-    print(f"{file_path} からメモリに重みを読み込み中...")
+    if verbose:
+        print(f"{file_path} からメモリに重みを読み込み中...")
     weights = load_file(file_path)
 
     # 2. paramsの構造にマッピング
@@ -23,7 +24,8 @@ def load_gpt2_weights(model_id="openai-community/gpt2"):
     }
 
     n_layer = sum(1 for key in weights.keys() if key.endswith(".ln_1.weight"))
-    print(f"トランスフォーマーブロック数: {n_layer}")
+    if verbose:
+        print(f"トランスフォーマーブロック数: {n_layer}")
 
     for i in range(n_layer):
         block_params = {

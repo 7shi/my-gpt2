@@ -7,14 +7,14 @@ from .model import GPT2
 from .loader import load_gpt2_weights
 from .model import softmax
 
-def generate(prompt, n_tokens_to_generate=30, temperature=1.0, model_id="openai-community/gpt2"):
+def generate(prompt, n_tokens_to_generate=30, temperature=1.0, model_id="openai-community/gpt2", verbose=False):
     # 1. トークナイザーと重みを読み込む
     spiece_path = f"weights/{model_id}/spiece.model"
     if os.path.exists(spiece_path):
         tokenizer = SentencePieceTokenizer(model_id)
     else:
         tokenizer = Tokenizer(model_id)
-    params = load_gpt2_weights(model_id)
+    params = load_gpt2_weights(model_id, verbose=verbose)
 
     # 2. モデルを初期化
     # GPT-2 small（124M）は12ヘッド
@@ -23,9 +23,12 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, model_id="openai-
     # 3. 入力をトークン化
     input_ids = tokenizer.encode(prompt)
 
-    print(f"\nプロンプト: '{prompt}'")
-    print(f"温度: {temperature}")
-    print("生成中: ", end="", flush=True)
+    if verbose:
+        print(f"\nプロンプト: '{prompt}'")
+        print(f"温度: {temperature}")
+        print("生成中: ", end="", flush=True)
+    else:
+        print(prompt, end="", flush=True)
 
     # 4. 生成ループ
     # マルチバイト文字の途中で切れた場合のバッファ
@@ -80,10 +83,15 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, model_id="openai-
 
         # テキスト終端トークンで停止
         if next_token == tokenizer.eos_id:
-            print("\n[テキスト終端に到達]")
+            if verbose:
+                print("\n[テキスト終端に到達]")
             break
 
-    print("\n\n全出力:")
+    print()
+
+    if verbose:
+        print("\n全出力:")
+
     if isinstance(tokenizer, SentencePieceTokenizer):
         return tokenizer.decode(input_ids)
     else:
@@ -104,14 +112,16 @@ def main():
     parser.add_argument("-n", "--n_tokens", type=int, default=30, help="生成するトークン数")
     parser.add_argument("-t", "--temperature", type=float, default=1.0, help="サンプリング温度（低いほど決定的）")
     parser.add_argument("-m", "--model", default="openai-community/gpt2", help="モデルID（例: openai-community/gpt2）")
+    parser.add_argument("-v", "--verbose", action="store_true", help="詳細な情報を表示する")
 
     args = parser.parse_args()
 
     # プロンプトの単語をスペースで結合
     prompt_text = " ".join(args.prompt)
 
-    output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, model_id=args.model)
-    print(output)
+    output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, model_id=args.model, verbose=args.verbose)
+    if args.verbose:
+        print(output)
 
 if __name__ == "__main__":
     main()
