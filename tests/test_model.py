@@ -7,10 +7,10 @@ def test_gpt2_full_shape():
     embed_dim, n_head, n_layer = 16, 2, 2
     max_pos = 128
     
-    # Mock parameters for GPT-2
+    # GPT-2のモックパラメータ
     params = {
-        "wte": np.random.randn(vocab_size, embed_dim), # Token embeddings
-        "wpe": np.random.randn(max_pos, embed_dim),    # Position embeddings
+        "wte": np.random.randn(vocab_size, embed_dim), # トークン埋め込み
+        "wpe": np.random.randn(max_pos, embed_dim),    # 位置埋め込み
         "blocks": [
             {
                 "ln_1": {"g": np.ones(embed_dim), "b": np.zeros(embed_dim)},
@@ -35,7 +35,7 @@ def test_gpt2_full_shape():
     
     model = GPT2(params, n_head)
     
-    # Input token IDs (integers)
+    # 入力トークンID（整数）
     input_ids = np.random.randint(0, vocab_size, (batch_size, seq_len))
     
     logits = model(input_ids)

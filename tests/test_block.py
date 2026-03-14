@@ -5,8 +5,8 @@ from my_gpt2.model import TransformerBlock
 def test_transformer_block_shape():
     batch_size, seq_len, embed_dim = 1, 10, 768
     n_head = 12
-    
-    # Mock parameters for the block
+
+    # ブロックのモックパラメータ
     params = {
         "ln_1": {"g": np.ones(embed_dim), "b": np.zeros(embed_dim)},
         "attn": {
@@ -23,10 +23,10 @@ def test_transformer_block_shape():
             "b_proj": np.zeros(embed_dim),
         }
     }
-    
+
     block = TransformerBlock(params, n_head)
     x = np.random.randn(batch_size, seq_len, embed_dim)
-    
+
     out = block(x)
-    
+
     assert out.shape == (batch_size, seq_len, embed_dim)

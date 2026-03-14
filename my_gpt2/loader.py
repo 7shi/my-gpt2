@@ -3,28 +3,28 @@ from safetensors.numpy import load_file
 
 def load_gpt2_weights():
     """
-    Load GPT-2 safetensors and map to our params dictionary.
-    Run `make download` first to get the weights.
+    GPT-2のsafetensorsを読み込み、paramsディクショナリにマッピングする。
+    事前に `make download` を実行して重みファイルを取得してください。
     """
     file_path = "weights/model.safetensors"
 
-    # 1. Load weights as numpy arrays
-    print(f"Loading weights from {file_path} into memory...")
+    # 1. 重みをnumpy配列として読み込む
+    print(f"{file_path} からメモリに重みを読み込み中...")
     weights = load_file(file_path)
-    
-    # 2. Map to our params structure
+
+    # 2. paramsの構造にマッピング
     prefix = "transformer." if "transformer.wte.weight" in weights else ""
-    
+
     params = {
         "wte": weights[f"{prefix}wte.weight"],
         "wpe": weights[f"{prefix}wpe.weight"],
         "ln_f": {"g": weights[f"{prefix}ln_f.weight"], "b": weights[f"{prefix}ln_f.bias"]},
         "blocks": []
     }
-    
+
     n_layer = sum(1 for key in weights.keys() if key.endswith(".ln_1.weight"))
-    print(f"Detected {n_layer} transformer blocks.")
-    
+    print(f"トランスフォーマーブロック数: {n_layer}")
+
     for i in range(n_layer):
         block_params = {
             "ln_1": {
@@ -32,8 +32,8 @@ def load_gpt2_weights():
                 "b": weights[f"{prefix}h.{i}.ln_1.bias"]
             },
             "attn": {
-                # Note: GPT-2 Conv1D weights are already (embed_dim, out_dim)
-                # So we can use x @ w_qkv directly. No transpose needed.
+                # GPT-2のConv1D重みは既に(embed_dim, out_dim)形式なので
+                # x @ w_qkv をそのまま使える。転置は不要。
                 "w_qkv": weights[f"{prefix}h.{i}.attn.c_attn.weight"],
                 "b_qkv": weights[f"{prefix}h.{i}.attn.c_attn.bias"],
                 "w_out": weights[f"{prefix}h.{i}.attn.c_proj.weight"],
@@ -51,5 +51,5 @@ def load_gpt2_weights():
             }
         }
         params["blocks"].append(block_params)
-        
+
     return params

@@ -1,13 +1,13 @@
 import json
 import re
 from functools import lru_cache
-import regex # GPT-2's regex uses \p{L} which requires 'regex' library
+import regex # GPT-2の正規表現は\p{L}を使うため'regex'ライブラリが必要
 
 @lru_cache()
 def bytes_to_unicode():
     """
-    Returns list of utf-8 byte and a corresponding list of unicode strings.
-    This is used to map bytes to strings in the GPT-2 tokenizer.
+    UTF-8バイト列と対応するユニコード文字列のリストを返す。
+    GPT-2トークナイザーでバイトを文字列にマッピングするために使用する。
     """
     bs = list(range(ord("!"), ord("~") + 1)) + list(range(ord("¡"), ord("¬") + 1)) + list(range(ord("®"), ord("ÿ") + 1))
     cs = bs[:]
@@ -21,7 +21,7 @@ def bytes_to_unicode():
     return dict(zip(bs, cs))
 
 def get_pairs(word):
-    """Return set of symbol pairs in a word."""
+    """単語中のシンボルペアの集合を返す。"""
     pairs = set()
     prev_char = word[0]
     for char in word[1:]:
@@ -34,15 +34,15 @@ class Tokenizer:
         with open(vocab_path, "r", encoding="utf-8") as f:
             self.encoder = json.load(f)
         self.decoder = {v: k for k, v in self.encoder.items()}
-        
+
         with open(merges_path, "r", encoding="utf-8") as f:
             bpe_data = f.read().split("\n")[1:-1]
             self.bpe_ranks = {tuple(m.split()): i for i, m in enumerate(bpe_data)}
-        
+
         self.byte_encoder = bytes_to_unicode()
         self.byte_decoder = {v: k for k, v in self.byte_encoder.items()}
-        
-        # GPT-2's specific regex
+
+        # GPT-2固有の正規表現
         self.pat = regex.compile(r"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+", regex.IGNORECASE)
 
     def bpe(self, token):
@@ -52,7 +52,7 @@ class Tokenizer:
             return token
 
         while True:
-            # Find the pair with the lowest rank (most frequent according to merges.txt)
+            # merges.txtに基づいてランクが最小（最頻出）のペアを探す
             bigram = min(pairs, key=lambda pair: self.bpe_ranks.get(pair, float("inf")))
             if bigram not in self.bpe_ranks:
                 break
@@ -83,17 +83,17 @@ class Tokenizer:
 
     def encode(self, text):
         bpe_tokens = []
-        # Pre-tokenize with regex
+        # 正規表現で事前トークン化
         for token in regex.findall(self.pat, text):
-            # Convert bytes to special characters
+            # バイトを特殊文字に変換
             token = "".join(self.byte_encoder[b] for b in token.encode("utf-8"))
-            # Apply BPE merge rules
+            # BPEマージルールを適用
             bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token).split(" "))
         return bpe_tokens
 
     def decode(self, tokens):
-        # Convert IDs back to special characters
+        # IDを特殊文字に変換
         text = "".join([self.decoder[token] for token in tokens])
-        # Convert special characters back to original bytes
+        # 特殊文字を元のバイト列に変換
         text = bytearray([self.byte_decoder[c] for c in text]).decode("utf-8", errors="replace")
         return text
