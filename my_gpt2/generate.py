@@ -116,12 +116,10 @@ def main():
 
     args = parser.parse_args()
 
-    # プロンプトの単語をスペースで結合
-    prompt_text = " ".join(args.prompt)
-
-    output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, model_id=args.model, verbose=args.verbose)
-    if args.verbose:
-        print(output)
+    for prompt_text in args.prompt:
+        output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, model_id=args.model, verbose=args.verbose)
+        if args.verbose:
+            print(output)
 
 if __name__ == "__main__":
     main()
