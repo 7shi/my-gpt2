@@ -103,6 +103,7 @@ uv run my-gpt2 -n 20 -m rinna/japanese-gpt2-small "吾輩は猫で"
 - `-p`, `--top_p`: Top-p サンプリング（Nucleus Sampling）。累積確率が p に達するまでのトークンを候補にします（デフォルト: なし）。
 - `-m`, `--model`: モデルID（デフォルト: `openai-community/gpt2`、例: `rinna/japanese-gpt2-small`）。
 - `-r`, `--repeat`: 同じプロンプトを繰り返す回数（デフォルト: 1）。サンプリングのばらつきを確認するのに便利です。
+- `-s`, `--seed`: 乱数シード（デフォルト: なし）。指定すると生成結果を再現できます。
 
 ## 🧪 テスト
 各モジュールの正当性を確認するためにテストを実行できます。

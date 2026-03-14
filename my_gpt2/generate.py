@@ -129,9 +129,13 @@ def main():
     parser.add_argument("-p", "--top_p", type=float, default=None, help="top-p サンプリング（累積確率p以内のトークンから選択）")
     parser.add_argument("-m", "--model", default="openai-community/gpt2", help="モデルID（例: openai-community/gpt2）")
     parser.add_argument("-r", "--repeat", type=int, default=1, help="同じプロンプトを繰り返す回数")
+    parser.add_argument("-s", "--seed", type=int, default=None, help="乱数シード（再現性のため）")
     parser.add_argument("-v", "--verbose", action="store_true", help="詳細な情報を表示する")
 
     args = parser.parse_args()
+
+    if args.seed is not None:
+        np.random.seed(args.seed)
 
     # モデルとトークナイザーを一度だけ読み込む
     spiece_path = f"weights/{args.model}/spiece.model"
