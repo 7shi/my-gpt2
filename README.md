@@ -126,7 +126,7 @@ Assistant:"
 > (snip)  
 > Assistant: Mind the capital of France
 
-rinna の語彙には改行が含まれないため、ここでは改行の代わりに `*` を使用します。全角の `！？` も語彙外のため半角を使用します。
+rinna の語彙には改行が含まれないため、ここでは改行の代わりに `*` を使用します。
 
 ```bash
 uv run my-gpt2 -n 10 -m rinna/japanese-gpt2-small "ユーザー: こんにちは!*アシスタント: こんにちは! 何かお手伝いできますか?*ユーザー: 日本の首都はどこですか?*アシスタント:"

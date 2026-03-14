@@ -1,5 +1,6 @@
 import math
 import struct
+import unicodedata
 
 
 def _read_varint(data, pos):
@@ -41,11 +42,14 @@ def _parse_fields(data, start, end):
 
 
 def _load_vocab(model_path):
-    """spiece.model の ModelProto.pieces (field 1) を全件抽出する。
-    戻り値: list of (piece: str, score: float, type: int)
+    """spiece.model の ModelProto を解析する。
+    戻り値: (vocab, normalizer_name)
+      vocab: list of (piece: str, score: float, type: int)
+      normalizer_name: str（例: 'nmt_nfkc'）または None
     """
     data = open(model_path, "rb").read()
     vocab = []
+    normalizer_name = None
     for fnum, wtype, val in _parse_fields(data, 0, len(data)):
         if fnum == 1 and wtype == 2:  # ModelProto.pieces
             piece, score, ptype = None, 0.0, 1
@@ -57,7 +61,11 @@ def _load_vocab(model_path):
                 elif f2 == 3 and w2 == 0:
                     ptype = v2
             vocab.append((piece, score, ptype))
-    return vocab
+        elif fnum == 3 and wtype == 2:  # normalizer_spec
+            for f2, w2, v2 in _parse_fields(val, 0, len(val)):
+                if f2 == 1 and w2 == 2:  # normalizer_spec.name
+                    normalizer_name = v2.decode("utf-8")
+    return vocab, normalizer_name
 
 
 def _escape_piece(piece):
@@ -75,7 +83,7 @@ def save_vocab(model_path, output_path=None):
     """
     if output_path is None:
         output_path = model_path.rsplit(".", 1)[0] + ".vocab"
-    vocab = _load_vocab(model_path)
+    vocab, _ = _load_vocab(model_path)
     with open(output_path, "w", encoding="utf-8") as f:
         for piece, score, _ in vocab:
             f.write(f"{_escape_piece(piece)}\t{score:.6f}\n")
@@ -95,7 +103,7 @@ def main():
 class SentencePieceTokenizer:
     def __init__(self, model_id="rinna/japanese-gpt2-small"):
         path = f"weights/{model_id}/spiece.model"
-        vocab = _load_vocab(path)
+        vocab, self._normalizer = _load_vocab(path)
         self._id_to_piece = [piece for piece, score, ptype in vocab]
         self._piece_to_id = {piece: i for i, (piece, score, ptype) in enumerate(vocab)}
         self._piece_to_score = {piece: score for piece, score, ptype in vocab}
@@ -103,8 +111,15 @@ class SentencePieceTokenizer:
         self.bos_id = self._piece_to_id.get("<s>", 1)
         self.eos_id = self._piece_to_id.get("</s>", 2)
 
+    def _normalize(self, text):
+        """normalizer_spec.name に従ってテキストを正規化する。"""
+        if self._normalizer and "nfkc" in self._normalizer:
+            text = unicodedata.normalize("NFKC", text)
+        return text
+
     def encode(self, text):
         """テキストを Viterbi アルゴリズムでトークン ID 列に変換する。"""
+        text = self._normalize(text)
         normalized = "▁" + text.replace(" ", "▁")
         n = len(normalized)
 
