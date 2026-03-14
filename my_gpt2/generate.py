@@ -28,7 +28,7 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p
         print(f"温度: {temperature}, top_k: {top_k}, top_p: {top_p}")
         print("生成中: ", end="", flush=True)
     else:
-        print(prompt, end="", flush=True)
+        print(tokenizer.decode(input_ids), end="", flush=True)
 
     # 4. 生成ループ
     # マルチバイト文字の途中で切れた場合のバッファ
