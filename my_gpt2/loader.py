@@ -1,12 +1,12 @@
 import numpy as np
 from safetensors.numpy import load_file
 
-def load_gpt2_weights():
+def load_gpt2_weights(model_id="openai-community/gpt2"):
     """
     GPT-2のsafetensorsを読み込み、paramsディクショナリにマッピングする。
     事前に `make download` を実行して重みファイルを取得してください。
     """
-    file_path = "weights/model.safetensors"
+    file_path = f"weights/{model_id}/model.safetensors"
 
     # 1. 重みをnumpy配列として読み込む
     print(f"{file_path} からメモリに重みを読み込み中...")

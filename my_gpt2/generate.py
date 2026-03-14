@@ -5,10 +5,10 @@ from .model import GPT2
 from .loader import load_gpt2_weights
 from .model import softmax
 
-def generate(prompt, n_tokens_to_generate=30, temperature=1.0):
+def generate(prompt, n_tokens_to_generate=30, temperature=1.0, model_id="openai-community/gpt2"):
     # 1. トークナイザーと重みを読み込む
-    tokenizer = Tokenizer()
-    params = load_gpt2_weights()
+    tokenizer = Tokenizer(model_id)
+    params = load_gpt2_weights(model_id)
 
     # 2. モデルを初期化
     # GPT-2 small（124M）は12ヘッド
@@ -90,13 +90,14 @@ def main():
     parser.add_argument("prompt", nargs="+", help="生成を開始するプロンプトテキスト")
     parser.add_argument("-n", "--n_tokens", type=int, default=30, help="生成するトークン数")
     parser.add_argument("-t", "--temperature", type=float, default=1.0, help="サンプリング温度（低いほど決定的）")
+    parser.add_argument("-m", "--model", default="openai-community/gpt2", help="モデルID（例: openai-community/gpt2）")
 
     args = parser.parse_args()
 
     # プロンプトの単語をスペースで結合
     prompt_text = " ".join(args.prompt)
 
-    output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature)
+    output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, model_id=args.model)
     print(output)
 
 if __name__ == "__main__":

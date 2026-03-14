@@ -2,7 +2,7 @@
 
 # Default model ID
 MODEL_ID = openai-community/gpt2
-WEIGHTS_DIR = weights
+WEIGHTS_DIR = weights/$(MODEL_ID)
 
 # URLs
 BASE_URL = https://huggingface.co/$(MODEL_ID)/resolve/main

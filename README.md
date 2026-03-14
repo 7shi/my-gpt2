@@ -30,6 +30,9 @@ my-gpt2/
 │   ├── tokenizer.py  # 自作 BPE トークナイザー
 │   ├── loader.py     # 重みロードとマッピング
 │   └── generate.py   # 文章生成実行スクリプト
+├── weights/
+│   └── openai-community/
+│       └── gpt2/     # make download で生成
 ├── docs/             # 技術解説ドキュメント (01〜04)
 ├── tests/            # ユニットテスト
 ├── Makefile          # セットアップと実行の自動化
@@ -68,6 +71,7 @@ uv run my-gpt2 "Once upon a time"
 - `prompt` (位置引数): 生成を開始するテキスト。
 - `-n`, `--n_tokens`: 生成するトークン数（デフォルト: 30）。
 - `-t`, `--temperature`: サンプリング温度。値を大きくすると多様性が増し、0 に近づけると決定的な生成になります（デフォルト: 1.0）。
+- `-m`, `--model`: モデルID（デフォルト: `openai-community/gpt2`）。
 
 ## 🧪 テスト
 各モジュールの正当性を確認するためにテストを実行できます。

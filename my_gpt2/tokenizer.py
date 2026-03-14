@@ -30,7 +30,9 @@ def get_pairs(word):
     return pairs
 
 class Tokenizer:
-    def __init__(self, vocab_path="weights/vocab.json", merges_path="weights/merges.txt"):
+    def __init__(self, model_id="openai-community/gpt2"):
+        vocab_path = f"weights/{model_id}/vocab.json"
+        merges_path = f"weights/{model_id}/merges.txt"
         with open(vocab_path, "r", encoding="utf-8") as f:
             self.encoder = json.load(f)
         self.decoder = {v: k for k, v in self.encoder.items()}
