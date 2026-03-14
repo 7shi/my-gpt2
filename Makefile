@@ -28,6 +28,7 @@ download-gpt2:
 
 download-rinna:
 	$(call download_model,$(RINNA_ID),spiece.model)
+	uv run model2vocab weights/$(RINNA_ID)/spiece.model
 
 run:
 	@uv run my-gpt2 "The quick brown fox" -n 20

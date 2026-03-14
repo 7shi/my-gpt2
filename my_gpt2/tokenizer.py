@@ -43,6 +43,7 @@ class Tokenizer:
 
         self.byte_encoder = bytes_to_unicode()
         self.byte_decoder = {v: k for k, v in self.byte_encoder.items()}
+        self.eos_id = self.encoder.get("<|endoftext|>", 50256)
 
         # GPT-2固有の正規表現
         self.pat = regex.compile(r"'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+", regex.IGNORECASE)

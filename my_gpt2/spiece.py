@@ -60,6 +60,38 @@ def _load_vocab(model_path):
     return vocab
 
 
+def _escape_piece(piece):
+    """制御文字を <0xXX> 形式にエスケープする。"""
+    return "".join(
+        f"<0x{ord(c):02X}>" if ord(c) < 0x20 or ord(c) == 0x7F else c
+        for c in piece
+    )
+
+
+def save_vocab(model_path, output_path=None):
+    """spiece.model の語彙を .vocab 形式（ピース\tスコア）で保存する。
+    output_path を省略すると model_path の拡張子を .vocab に変えたパスを使う。
+    制御文字は <0xXX> 形式にエスケープする。
+    """
+    if output_path is None:
+        output_path = model_path.rsplit(".", 1)[0] + ".vocab"
+    vocab = _load_vocab(model_path)
+    with open(output_path, "w", encoding="utf-8") as f:
+        for piece, score, _ in vocab:
+            f.write(f"{_escape_piece(piece)}\t{score:.6f}\n")
+    return output_path
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="spiece.model を .vocab 形式に変換する")
+    parser.add_argument("model", help="spiece.model のパス")
+    parser.add_argument("-o", "--output", default=None, help="出力先ファイルパス（省略時は拡張子を .vocab に変換）")
+    args = parser.parse_args()
+    out = save_vocab(args.model, args.output)
+    print(out)
+
+
 class SentencePieceTokenizer:
     def __init__(self, model_id="rinna/japanese-gpt2-small"):
         path = f"weights/{model_id}/spiece.model"

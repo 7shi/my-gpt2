@@ -1,8 +1,8 @@
 # my-gpt2: GPT-2 Scratch Implementation with NumPy
 
-このプロジェクトは、LLM（大規模言語モデル）のアーキテクチャを深く理解するために、[GPT-2](https://huggingface.co/openai-community/gpt2)（124Mモデル）の推論エンジンをスクラッチで実装したものです。PyTorchやTensorFlowなどの深層学習フレームワークを使用せず、NumPyによってTransformerの仕組みを再現しています。
+このプロジェクトは、LLM（大規模言語モデル）のアーキテクチャを深く理解するために、[GPT-2](https://huggingface.co/openai-community/gpt2)（124Mモデル）の推論エンジンをスクラッチで実装したものです。PyTorchやTensorFlowなどの深層学習フレームワークを使用せず、NumPyによってTransformerの仕組みを再現しています。rinna社が開発した日本語モデル [japanese-gpt2-small](https://huggingface.co/rinna/japanese-gpt2-small) にも対応しています。
 
-**約400行のPythonコード**で、トークナイザー、モデル本体、重みロード、文章生成までの全工程を完結させているのが特徴です。初期実装（GPT-2 による英語テキスト生成が動作するまで）は、Gemini CLI を使い、Gemini 3 Flash Preview モデルとの対話を通じて約2時間で構築されました。
+初期実装（GPT-2 による英語テキスト生成が動作するまで）は、Gemini CLI を使い、Gemini 3 Flash Preview モデルとの対話を通じて**約400行・約2時間**で構築されました。
 
 その後、Claude Code を使いながら、日本語モデル対応や SentencePiece トークナイザーの実装など、追加開発を継続しています。
 
@@ -10,6 +10,7 @@
 
 - **フレームワーク不使用**: 行列演算ライブラリ `NumPy` のみを用いた GPT-2 推論エンジン。
 - **自作 BPE トークナイザー**: OpenAI の公式仕様（バイトレベル BPE）に準拠したトークナイザーを独自に実装。
+- **自作 SentencePiece トークナイザー**: `rinna/japanese-gpt2-small` 向けのユニグラムモデルを外部ライブラリなしで実装。`-m` オプションでモデルを切り替えるだけで日本語生成に対応。
 - **公式重みのロード**: Hugging Face で公開されている `safetensors` 形式の学習済み重みを読み込み、推論（文章生成）が可能。
 - **テスト駆動開発 (TDD)**: 各コンポーネント（Attention, MLP, LayerNorm 等）が数学的に正しいことを `pytest` で検証済み。
 - **詳細な解説ドキュメント**: 「なぜその設計になっているのか」という動機（Motivation）を含めた技術解説を完備。
@@ -22,6 +23,7 @@
 2. [02_attention.md](docs/02_attention.md): Multi-Head Attention と 因果マスキング
 3. [03_block.md](docs/03_block.md): Pre-LayerNorm と 残差接続
 4. [04_model_overall.md](docs/04_model_overall.md): 全体構成と 重み共有 (Weight Tying)
+5. [05_spiece.md](docs/05_spiece.md): SentencePiece トークナイザー（ユニグラムモデル）
 
 ## 📁 ディレクトリ構成
 
@@ -30,12 +32,15 @@ my-gpt2/
 ├── my_gpt2/
 │   ├── model.py      # GPT-2 アーキテクチャ本体 (Transformer)
 │   ├── tokenizer.py  # 自作 BPE トークナイザー
+│   ├── spiece.py     # 自作 SentencePiece トークナイザー（rinna 向け）
 │   ├── loader.py     # 重みロードとマッピング
 │   └── generate.py   # 文章生成実行スクリプト
 ├── weights/
-│   └── openai-community/
-│       └── gpt2/     # make download で生成
-├── docs/             # 技術解説ドキュメント (01〜04)
+│   ├── openai-community/
+│   │   └── gpt2/                  # make download-gpt2 で生成
+│   └── rinna/
+│       └── japanese-gpt2-small/   # make download-rinna で生成
+├── docs/             # 技術解説ドキュメント (01〜05)
 ├── tests/            # ユニットテスト
 ├── Makefile          # セットアップと実行の自動化
 └── pyproject.toml    # プロジェクト設定 (hatchling)
@@ -67,8 +72,11 @@ make run
 ```
 または、詳細なオプションを指定して実行します。
 ```bash
-# 基本的な実行
+# 英語（openai-community/gpt2、デフォルト）
 uv run my-gpt2 "Once upon a time"
+
+# 日本語（rinna/japanese-gpt2-small）
+uv run my-gpt2 -m rinna/japanese-gpt2-small "吾輩は猫である"
 ```
 
 #### 主なオプション:
@@ -92,31 +100,54 @@ uv run pytest
 指示に従う訓練（Instruct）を受けていないモデルでも、「対話の記録」というパターンを模したプロンプトを渡すことで、アシスタントのように振る舞わせることができます。
 
 ```bash
-uv run my-gpt2 "User: Hello!
+# 英語
+uv run my-gpt2 -n 5 "User: Hello!
 Assistant: Hello! How can I help you today?
 User: What is the capital of France?
-Assistant:" -n 5
+Assistant:"
+
+# 日本語
+# rinna の語彙には改行が含まれないため、改行の代わりに * を使用する。
+# * はモデルが区切り記号として学習しており、生成結果にも自然に現れる。
+# 全角の！？も語彙外のため半角を使用する。
+uv run my-gpt2 -n 10 -m rinna/japanese-gpt2-small "ユーザー: こんにちは!*アシスタント: こんにちは! 何かお手伝いできますか?*ユーザー: 日本の首都はどこですか?*アシスタント:"
 ```
 
 ### 2. パターンによる知識抽出（Analogy）
 「AはBである。ならばCはDである」という推論能力（アナロジー）を利用します。文章を途中で止めることで、モデルが持つ知識を自然な形で引き出すことができます。
 
 ```bash
-uv run my-gpt2 "The capital of Japan is Tokyo. The capital of France is" -n 5
+# 英語
+uv run my-gpt2 -n 5 "The capital of Japan is Tokyo. The capital of France is"
+
+# 日本語
+uv run my-gpt2 -n 5 -m rinna/japanese-gpt2-small "日本の首都は東京です。フランスの首都は"
 ```
 
-### 3. 執筆の呼び水・ダミーテキスト生成
+### 3. GPT-2 への日本語入力
+英語ベースの GPT-2 は Byte-level BPE により日本語を受け付けますが、日本語として意味の通じる文章は生成できません。日本語の断片や記号が混在した出力になります。
+
+```bash
+uv run my-gpt2 -n 20 "吾輩は猫である"
+# → 吾輩は猫であることは何有能はならな...‰…Gya,
+```
+
+日本語で意味の通じる文章を生成するには `rinna/japanese-gpt2-small` を使用してください。
+
+```bash
+uv run my-gpt2 -n 20 -m rinna/japanese-gpt2-small "吾輩は猫である"
+# → 吾輩は猫である! というキャッチコピーに反応し、アマゾンで回答をしたため、ゾンビに見せかけた酒を
+```
+
+### 4. 執筆の呼び水・ダミーテキスト生成
 物語や記事の書き出しを渡し、温度（Temperature）を調整することで、多様なアイデアを生成させることができます。
 
 ```bash
-uv run my-gpt2 "Once upon a time" -n 50 -t 0.8
-```
+# 英語
+uv run my-gpt2 -n 50 -t 0.8 "Once upon a time"
 
-### 4. 日本語での活用
-英語ベースのモデルですが、Byte-level BPE により日本語の入力も可能です。文法的な正しさは保証されませんが、技術的なデモとして短い文章の続きを生成させることができます。
-
-```bash
-uv run my-gpt2 "昔々あるところに" -n 20 -t 0.7
+# 日本語
+uv run my-gpt2 -n 50 -t 0.8 -m rinna/japanese-gpt2-small "昔々あるところに"
 ```
 
 ---

@@ -22,6 +22,7 @@ build-backend = "hatchling.build"
 
 [project.scripts]
 my-gpt2 = "my_gpt2.generate:main"
+model2vocab = "my_gpt2.spiece:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["my_gpt2"]

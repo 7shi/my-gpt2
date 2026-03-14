@@ -1,13 +1,19 @@
+import os
 import numpy as np
 import argparse
 from .tokenizer import Tokenizer
+from .spiece import SentencePieceTokenizer
 from .model import GPT2
 from .loader import load_gpt2_weights
 from .model import softmax
 
 def generate(prompt, n_tokens_to_generate=30, temperature=1.0, model_id="openai-community/gpt2"):
     # 1. トークナイザーと重みを読み込む
-    tokenizer = Tokenizer(model_id)
+    spiece_path = f"weights/{model_id}/spiece.model"
+    if os.path.exists(spiece_path):
+        tokenizer = SentencePieceTokenizer(model_id)
+    else:
+        tokenizer = Tokenizer(model_id)
     params = load_gpt2_weights(model_id)
 
     # 2. モデルを初期化
@@ -48,38 +54,45 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, model_id="openai-
         # シーケンスに追加
         input_ids.append(next_token)
 
-        # 新トークンの生のバイト列を取得
-        token_str = tokenizer.decoder[next_token]
-        token_bytes = bytes([tokenizer.byte_decoder[c] for c in token_str])
-        byte_buffer.extend(token_bytes)
+        # ストリーミング出力
+        if isinstance(tokenizer, SentencePieceTokenizer):
+            piece = tokenizer._id_to_piece[next_token]
+            print(piece.replace("▁", " "), end="", flush=True)
+        else:
+            # 新トークンの生のバイト列を取得
+            token_str = tokenizer.decoder[next_token]
+            token_bytes = bytes([tokenizer.byte_decoder[c] for c in token_str])
+            byte_buffer.extend(token_bytes)
 
-        # バッファをUTF-8としてデコードを試みる
-        try:
-            # バッファ全体が有効なUTF-8の場合
-            decoded_text = byte_buffer.decode("utf-8")
-            print(decoded_text, end="", flush=True)
-            byte_buffer.clear()
-        except UnicodeDecodeError as e:
-            # 有効な部分だけデコード
-            valid_bytes = byte_buffer[:e.start]
-            if valid_bytes:
-                print(valid_bytes.decode("utf-8"), end="", flush=True)
-                # 無効な部分は次のトークンのために保持
-                del byte_buffer[:e.start]
+            # バッファをUTF-8としてデコードを試みる
+            try:
+                # バッファ全体が有効なUTF-8の場合
+                decoded_text = byte_buffer.decode("utf-8")
+                print(decoded_text, end="", flush=True)
+                byte_buffer.clear()
+            except UnicodeDecodeError as e:
+                # 有効な部分だけデコード
+                valid_bytes = byte_buffer[:e.start]
+                if valid_bytes:
+                    print(valid_bytes.decode("utf-8"), end="", flush=True)
+                    # 無効な部分は次のトークンのために保持
+                    del byte_buffer[:e.start]
 
-        # テキスト終端トークン（50256）で停止
-        if next_token == 50256:
+        # テキスト終端トークンで停止
+        if next_token == tokenizer.eos_id:
             print("\n[テキスト終端に到達]")
             break
 
     print("\n\n全出力:")
-    # 最終デコード: 末尾の不完全なマルチバイト文字は無視する
-    full_bytes = bytearray()
-    for tid in input_ids:
-        token_str = tokenizer.decoder[tid]
-        full_bytes.extend([tokenizer.byte_decoder[c] for c in token_str])
-
-    return full_bytes.decode("utf-8", errors="ignore")
+    if isinstance(tokenizer, SentencePieceTokenizer):
+        return tokenizer.decode(input_ids)
+    else:
+        # 最終デコード: 末尾の不完全なマルチバイト文字は無視する
+        full_bytes = bytearray()
+        for tid in input_ids:
+            token_str = tokenizer.decoder[tid]
+            full_bytes.extend([tokenizer.byte_decoder[c] for c in token_str])
+        return full_bytes.decode("utf-8", errors="ignore")
 
 def main():
     parser = argparse.ArgumentParser(

@@ -259,3 +259,45 @@ ids = t.encode("吾輩は猫である。")
 print(ids)          # [9, 5361, 31082, 11, 4324, 27, 8]
 print(t.decode(ids))  # '吾輩は猫である。'
 ```
+
+---
+
+## 付録: .model と .vocab の関係
+
+`spiece.model` は推論に使うバイナリ（protobuf）です。内容を人間が読める形で確認したい場合は、同じ情報をタブ区切りテキストに変換した `.vocab` ファイルを使います。
+
+```
+ピース\tスコア
+```
+
+スコアはユニグラムモデルの対数確率で、値が大きい（0 に近い）ほど高頻度なピースです。特殊トークン（`<unk>` など）はスコア 0 で固定されています。
+
+### model2vocab コマンド
+
+`model2vocab` コマンドで変換できます。
+
+```bash
+uv run model2vocab weights/rinna/japanese-gpt2-small/spiece.model
+```
+
+出力先を変更する場合は `-o` で指定します。
+
+```bash
+uv run model2vocab weights/rinna/japanese-gpt2-small/spiece.model -o vocab.txt
+```
+
+`make download-rinna` 実行時に自動で変換され、`spiece.vocab` が生成されます。先頭 11 行:
+
+```
+<unk>	0.000000
+<s>	0.000000
+</s>	0.000000
+[PAD]	0.000000
+[CLS]	0.000000
+[SEP]	0.000000
+[MASK]	0.000000
+、	-3.009356
+。	-3.282608
+▁	-3.523782
+の	-3.658956
+```
