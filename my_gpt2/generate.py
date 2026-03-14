@@ -7,7 +7,7 @@ from .model import GPT2
 from .loader import load_gpt2_weights
 from .model import softmax
 
-def generate(prompt, n_tokens_to_generate=30, temperature=1.0, model_id="openai-community/gpt2", verbose=False):
+def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p=None, model_id="openai-community/gpt2", verbose=False):
     # 1. トークナイザーと重みを読み込む
     spiece_path = f"weights/{model_id}/spiece.model"
     if os.path.exists(spiece_path):
@@ -25,7 +25,7 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, model_id="openai-
 
     if verbose:
         print(f"\nプロンプト: '{prompt}'")
-        print(f"温度: {temperature}")
+        print(f"温度: {temperature}, top_k: {top_k}, top_p: {top_p}")
         print("生成中: ", end="", flush=True)
     else:
         print(prompt, end="", flush=True)
@@ -48,7 +48,21 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, model_id="openai-
         if temperature > 0:
             # ロジットをスケールしてランダムサンプリング
             next_token_logits = next_token_logits / temperature
+            if top_k is not None and top_k > 0:
+                # 上位k個以外を -inf にマスク
+                top_k_indices = np.argpartition(next_token_logits, -top_k)[-top_k:]
+                mask = np.full_like(next_token_logits, -np.inf)
+                mask[top_k_indices] = next_token_logits[top_k_indices]
+                next_token_logits = mask
             probs = softmax(next_token_logits)
+            if top_p is not None and 0.0 < top_p < 1.0:
+                # 確率の降順にソートし、累積確率が top_p を超えるまでのトークンのみ残す
+                sorted_indices = np.argsort(probs)[::-1]
+                cumulative_probs = np.cumsum(probs[sorted_indices])
+                cutoff = np.searchsorted(cumulative_probs, top_p) + 1
+                removed = sorted_indices[cutoff:]
+                probs[removed] = 0.0
+                probs /= probs.sum()
             next_token = int(np.random.choice(len(probs), p=probs))
         else:
             # 温度が0の場合は貪欲探索
@@ -111,13 +125,15 @@ def main():
     parser.add_argument("prompt", nargs="+", help="生成を開始するプロンプトテキスト")
     parser.add_argument("-n", "--n_tokens", type=int, default=30, help="生成するトークン数")
     parser.add_argument("-t", "--temperature", type=float, default=1.0, help="サンプリング温度（低いほど決定的）")
+    parser.add_argument("-k", "--top_k", type=int, default=None, help="top-k サンプリング（上位k個のトークンから選択）")
+    parser.add_argument("-p", "--top_p", type=float, default=None, help="top-p サンプリング（累積確率p以内のトークンから選択）")
     parser.add_argument("-m", "--model", default="openai-community/gpt2", help="モデルID（例: openai-community/gpt2）")
     parser.add_argument("-v", "--verbose", action="store_true", help="詳細な情報を表示する")
 
     args = parser.parse_args()
 
     for prompt_text in args.prompt:
-        output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, model_id=args.model, verbose=args.verbose)
+        output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, top_k=args.top_k, top_p=args.top_p, model_id=args.model, verbose=args.verbose)
         if args.verbose:
             print(output)
 

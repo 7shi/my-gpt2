@@ -61,7 +61,7 @@ return np.matmul(x, self.params["wte"].T)
 
 推論時には、この出力の最後尾（最新の単語）の確率分布から次のトークンを選択し、それを再び入力に追加して推論を繰り返します（自己回帰）。
 
-### サンプリング手法：Greedy vs Temperature
+### サンプリング手法
 
 **ロジット（logit）**とは Softmax を適用する前の生のスコアのことです。Temperature サンプリングでは、ロジットを温度 $T$ で割ることで確率分布の「尖り具合」を調整します。
 
@@ -73,7 +73,7 @@ T=0.5 （集中）: ÷0.5 → [4.0, 2.0, 1.0]  → softmax → [0.84, 0.11, 0.05
 T=2.0 （平坦）: ÷2.0 → [1.0, 0.5, 0.25] → softmax → [0.46, 0.34, 0.20]
 ```
 
-トークンを選択する手法には主に以下の 2 つがあります：
+トークンを選択する手法には主に以下の 4 つがあります：
 
 1. **Greedy Search (Temperature = 0)**:
    常に最も確率が高いトークンを 1 つだけ選びます。
@@ -84,50 +84,55 @@ T=2.0 （平坦）: ÷2.0 → [1.0, 0.5, 0.25] → softmax → [0.46, 0.34, 0.20
    - **低温度 (T < 1.0)**: 確率の高いトークンに集中し、保守的で安全な生成になります。
    - **高温度 (T > 1.0)**: 確率の低いトークンにもチャンスを与え、多様で創造的な（時には支離滅裂な）生成になります。
 
+3. **Top-k Sampling**:
+   Temperature 適用後のロジットのうち、上位 $k$ 個のトークン以外を $-\infty$ にマスクしてから Softmax をかけます。確率が極端に低いトークンを候補から除外することで、生成の質を安定させます。
+   - **特徴**: 候補数が常に $k$ 個に固定されるため、語彙の分布によっては適切でないことがあります。
+
+4. **Top-p Sampling（Nucleus Sampling）**:
+   Softmax 後の確率を高い順に並べ、累積確率が $p$ に達するまでのトークンだけを候補にします。語彙の分布に応じて候補数が動的に変わるため、top-k より適応的です。
+   - **例**: $p=0.9$ のとき、上位トークンが確率0.6・0.25・0.10なら累積0.95で3トークンが候補。上位1トークンだけで0.95を超える場合はそれ1つのみになります。
+
+top-k と top-p は組み合わせることができ、その場合は top-k でマスクした後に top-p をさらに適用します。
+
 ```python
 # 実装の抜粋 (my_gpt2/generate.py)
-# spiece.model の有無でトークナイザーを切り替える
-spiece_path = f"weights/{model_id}/spiece.model"
-if os.path.exists(spiece_path):
-    tokenizer = SentencePieceTokenizer(model_id)  # rinna など
-else:
-    tokenizer = Tokenizer(model_id)               # openai-community/gpt2 など
-
-# 不完全なマルチバイト文字を扱うためのバッファ（BPE 専用）
-byte_buffer = bytearray()
-
 for _ in range(n_tokens_to_generate):
     logits = model(inputs)
     next_token_logits = logits[0, -1, :]
 
     # サンプリング
     if temperature > 0:
-        probs = softmax(next_token_logits / temperature)
+        next_token_logits = next_token_logits / temperature
+
+        # top-k: 上位k個以外を -inf にマスク
+        if top_k is not None and top_k > 0:
+            top_k_indices = np.argpartition(next_token_logits, -top_k)[-top_k:]
+            mask = np.full_like(next_token_logits, -np.inf)
+            mask[top_k_indices] = next_token_logits[top_k_indices]
+            next_token_logits = mask
+
+        probs = softmax(next_token_logits)
+
+        # top-p: 累積確率が p に達するまでのトークンのみ残す
+        if top_p is not None and 0.0 < top_p < 1.0:
+            sorted_indices = np.argsort(probs)[::-1]
+            cumulative_probs = np.cumsum(probs[sorted_indices])
+            cutoff = np.searchsorted(cumulative_probs, top_p) + 1
+            removed = sorted_indices[cutoff:]
+            probs[removed] = 0.0
+            probs /= probs.sum()
+
         next_token = int(np.random.choice(len(probs), p=probs))
     else:
         next_token = int(np.argmax(next_token_logits))
+```
 
-    # ストリーミング出力（トークナイザーの種類で分岐）
-    if isinstance(tokenizer, SentencePieceTokenizer):
-        # ▁ をスペースに置換してそのまま表示
-        piece = tokenizer._id_to_piece[next_token]
-        print(piece.replace("▁", " "), end="", flush=True)
-    else:
-        # BPE: バイト列として蓄積し、UTF-8として完成した文字から表示
-        token_str = tokenizer.decoder[next_token]
-        byte_buffer.extend([tokenizer.byte_decoder[c] for c in token_str])
-        try:
-            print(byte_buffer.decode("utf-8"), end="", flush=True)
-            byte_buffer.clear()
-        except UnicodeDecodeError as e:
-            valid_bytes = byte_buffer[:e.start]
-            if valid_bytes:
-                print(valid_bytes.decode("utf-8"), end="", flush=True)
-                del byte_buffer[:e.start]
+コマンドライン引数との対応：
 
-    # EOS トークンで停止（tokenizer.eos_id で統一）
-    if next_token == tokenizer.eos_id:
-        break
+```
+-t / --temperature  サンプリング温度（デフォルト: 1.0、0で Greedy）
+-k / --top_k        top-k の k（デフォルト: なし）
+-p / --top_p        top-p の p（デフォルト: なし、0〜1の実数）
 ```
 
 ## まとめ：推論の全プロセス
@@ -135,4 +140,4 @@ for _ in range(n_tokens_to_generate):
 2.  Embeddingでベクトル化し、位置情報を足す。
 3.  複数の Transformer Block を通して文脈を深める。
 4.  Weight Tying を使って語彙確率に変換。
-5.  サンプリング手法（温度）を用いて次の単語を決定し、再び入力へ。
+5.  サンプリング手法（Temperature / Top-k / Top-p）を用いて次の単語を決定し、再び入力へ。
