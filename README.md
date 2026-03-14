@@ -49,10 +49,12 @@ uv sync
 ```
 
 ### 2. 重みと語彙ファイルのダウンロード
-公式の GPT-2 重み (`model.safetensors`) とトークナイザー用ファイル (`vocab.json`, `merges.txt`) をダウンロードします。
+公式の GPT-2 重み (`model.safetensors`) とトークナイザー用ファイルをダウンロードします。
 
 ```bash
-make download
+make download          # 両モデルをまとめてダウンロード
+make download-gpt2     # openai-community/gpt2 のみ
+make download-rinna    # rinna/japanese-gpt2-small のみ
 ```
 
 ### 3. 文章生成の実行
@@ -71,7 +73,7 @@ uv run my-gpt2 "Once upon a time"
 - `prompt` (位置引数): 生成を開始するテキスト。
 - `-n`, `--n_tokens`: 生成するトークン数（デフォルト: 30）。
 - `-t`, `--temperature`: サンプリング温度。値を大きくすると多様性が増し、0 に近づけると決定的な生成になります（デフォルト: 1.0）。
-- `-m`, `--model`: モデルID（デフォルト: `openai-community/gpt2`）。
+- `-m`, `--model`: モデルID（デフォルト: `openai-community/gpt2`、例: `rinna/japanese-gpt2-small`）。
 
 ## 🧪 テスト
 各モジュールの正当性を確認するためにテストを実行できます。
