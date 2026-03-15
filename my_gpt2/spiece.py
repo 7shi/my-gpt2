@@ -112,15 +112,15 @@ class SentencePieceTokenizer:
         self.eos_id = self._piece_to_id.get("</s>", 2)
 
     def _normalize(self, text):
-        """normalizer_spec.name に従ってテキストを正規化する。"""
+        # normalizer_spec.name に応じたテキスト変換
         if self._normalizer and "nfkc" in self._normalizer:
             text = unicodedata.normalize("NFKC", text)
-        return text
+        # スペースを ▁ に置換して先頭に ▁ を付加
+        return "▁" + text.replace(" ", "▁")
 
     def encode(self, text):
         """テキストを Viterbi アルゴリズムでトークン ID 列に変換する。"""
-        text = self._normalize(text)
-        normalized = "▁" + text.replace(" ", "▁")
+        normalized = self._normalize(text)
         n = len(normalized)
 
         # best[i] = (累積スコア, 前の pos, piece)
