@@ -19,15 +19,17 @@
 
 `docs/` ディレクトリに、推論パイプラインの処理順序に沿った解説と実験スクリプトがあります。
 
-1. [01_overview](docs/01_overview.md): 推論パイプラインの全体像（[実験](docs/01_overview.py)）
-2. [02_tokenizer](docs/02_tokenizer.md): バイトレベル BPE と Unicode マッピング
-3. [03_spiece](docs/03_spiece.md): SentencePiece トークナイザー（ユニグラムモデル）
-4. [04_embedding](docs/04_embedding.md): Embedding — トークンIDからベクトルへ（[実験](docs/04_embedding.py)）
-5. [05_layer_norm](docs/05_layer_norm.md): Layer Normalization（[実験](docs/05_layer_norm.py)）
-6. [06_attention](docs/06_attention.md): Attention — 文脈の理解（[実験](docs/06_attention.py)）
-7. [07_mlp](docs/07_mlp.md): MLP — トークンの特徴変換（[実験](docs/07_mlp.py)）
-8. [08_residual](docs/08_residual.md): 残差接続と Transformer Block（[実験](docs/08_residual.py)）
-9. [09_output](docs/09_output.md): 出力 — LM Head、Weight Tying、サンプリング（[実験](docs/09_output.py)）
+| ドキュメント | テーマ | 実験 |
+|---|---|---|
+| [01_overview](docs/01_overview.md) | 推論パイプラインの全体像 | [実験](docs/01_overview.py) |
+| [02_tokenizer](docs/02_tokenizer.md) | バイトレベル BPE と Unicode マッピング | |
+| [03_spiece](docs/03_spiece.md) | SentencePiece トークナイザー（ユニグラムモデル） | |
+| [04_embedding](docs/04_embedding.md) | Embedding — トークンIDからベクトルへ | [実験](docs/04_embedding.py) |
+| [05_layer_norm](docs/05_layer_norm.md) | Layer Normalization | [実験](docs/05_layer_norm.py) |
+| [06_attention](docs/06_attention.md) | Attention — 文脈の理解 | [実験](docs/06_attention.py) |
+| [07_mlp](docs/07_mlp.md) | MLP — トークンの特徴変換 | [実験](docs/07_mlp.py) |
+| [08_residual](docs/08_residual.md) | 残差接続と Transformer Block | [実験](docs/08_residual.py) |
+| [09_output](docs/09_output.md) | 出力 — LM Head、Weight Tying、サンプリング | [実験](docs/09_output.py) |
 
 ## 🔍 GPT-2 の位置づけ
 
