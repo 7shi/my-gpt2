@@ -9,16 +9,16 @@ def bytes_to_unicode():
     UTF-8バイト列と対応するユニコード文字列のリストを返す。
     GPT-2トークナイザーでバイトを文字列にマッピングするために使用する。
     """
-    bs = list(range(ord("!"), ord("~") + 1)) + list(range(ord("¡"), ord("¬") + 1)) + list(range(ord("®"), ord("ÿ") + 1))
-    cs = bs[:]
+    non_printable = set([*range(0, 0x20 + 1), *range(0x7F, 0xA0 + 1), 0xAD])
+    result = {}
     n = 0
     for b in range(256):
-        if b not in bs:
-            bs.append(b)
-            cs.append(256 + n)
+        if b in non_printable:
+            result[b] = chr(256 + n)
             n += 1
-    cs = [chr(n) for n in cs]
-    return dict(zip(bs, cs))
+        else:
+            result[b] = chr(b)
+    return result
 
 def get_pairs(word):
     """単語中のシンボルペアの集合を返す。"""
