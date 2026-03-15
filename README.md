@@ -25,6 +25,18 @@
 4. [04_model_overall.md](docs/04_model_overall.md): 全体構成と 重み共有 (Weight Tying)
 5. [05_spiece.md](docs/05_spiece.md): SentencePiece トークナイザー（ユニグラムモデル）
 
+### 推論パイプライン順の解説
+
+`model.py` の処理順序に沿って、各コンポーネントを実験スクリプト付きで解説しています。
+
+1. [11_overview.md](docs/11_overview.md): 推論パイプラインの全体像
+2. [12_embedding.md](docs/12_embedding.md): Embedding（トークンIDからベクトルへ）
+3. [13_layer_norm.md](docs/13_layer_norm.md): Layer Normalization
+4. [14_attention.md](docs/14_attention.md): Attention（文脈の理解）
+5. [15_mlp.md](docs/15_mlp.md): MLP（トークンの特徴変換）
+6. [16_residual.md](docs/16_residual.md): 残差接続と Transformer Block
+7. [17_output.md](docs/17_output.md): 出力（LM Head、Weight Tying、サンプリング）
+
 ## 🧪 実験と体験 (Experiments)
 
 実際の重みを使って、GPT-2 の内部でデータがどのように変化していくかを段階的に体験できるスクリプトと解説です。
@@ -34,6 +46,18 @@
 3. [03_attention.md](experiments/03_attention.md): 情報を吸い込むための「検索（Q, K, V）」
 4. [04_block.md](experiments/04_block.md): 情報を積み重ね、高次元で「深掘り（MLP）」する
 5. [05_generation.md](experiments/05_generation.md): 最も自然な単語を「確率」で選び出す
+
+### 推論パイプライン順の実験
+
+上記の docs/11〜17 に対応する実験スクリプトです。
+
+1. [11_overview.py](experiments/11_overview.py): パイプライン各段階の形状と統計
+2. [12_embedding.py](experiments/12_embedding.py): コサイン類似度、最近傍探索、ベクトル演算
+3. [13_layer_norm.py](experiments/13_layer_norm.py): 正規化前後の統計比較
+4. [14_attention.py](experiments/14_attention.py): 注目分布と因果マスキング
+5. [15_mlp.py](experiments/15_mlp.py): GELU 活性化と次元変化
+6. [16_residual.py](experiments/16_residual.py): ブロック内処理と文脈付き埋め込み
+7. [17_output.py](experiments/17_output.py): Temperature 比較と自己回帰生成
 
 ## 🔍 GPT-2 の位置づけ
 
