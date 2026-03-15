@@ -1,6 +1,22 @@
 # GPT-2 推論パイプラインの全体像
 
-GPT-2 は「テキストを受け取り、次の単語（トークン）を予測する」モデルです。入力されたテキストは以下のパイプラインを通り、最終的に「次に来る単語の確率分布」として出力されます。
+## GPT-2 とは
+
+GPT-2 は OpenAI が2019年2月に発表した言語モデルです。「テキストを受け取り、次の単語（トークン）を予測する」というシンプルな目的で訓練されていますが、その生成能力の高さから「危険すぎて公開できない（too dangerous to release）」として大きな議論を呼びました。
+
+当初は最小の124Mパラメータモデルのみが公開され、最大の1.5Bパラメータモデルは段階的リリースを経て2019年11月に全面公開されました。AI の責任ある公開（responsible release）という概念が広く議論される契機となったモデルでもあります。
+
+現代の LLM（GPT-4、Claude など）も、Transformer アーキテクチャの基本は2017年の "Attention is All You Need" からほぼ変わっていません。GPT-2 との本質的な違いはパラメータ数と学習データの規模です。GPT-2 は現代の LLM の内部構造を理解するための最もコンパクトな出発点です。
+
+### 日本語モデル: rinna/japanese-gpt2-small
+
+2021年、rinna社（当時マイクロソフト子会社）が GPT-2 と同じ Transformer アーキテクチャを用い、日本語 Wikipedia と CC-100 で学習した日本語 GPT-2 モデルをオープンソースで公開しました。トークナイザーのみ SentencePiece（ユニグラムモデル）に置き換えられていますが、モデル本体の構造は GPT-2 と同一です。本プロジェクトでは `-m rinna/japanese-gpt2-small` オプションで切り替えて使用できます。
+
+---
+
+## 推論パイプライン
+
+GPT-2 に入力されたテキストは以下のパイプラインを通り、最終的に「次に来る単語の確率分布」として出力されます。
 
 ```
 テキスト
@@ -110,11 +126,11 @@ uv run docs/01_overview.py
 
 | ドキュメント | テーマ |
 |---|---|
-| 02_tokenizer | BPE トークナイザー |
-| 03_spiece | SentencePiece トークナイザー |
-| 04_embedding | トークンIDからベクトルへの変換 |
-| 05_layer_norm | Layer Normalization による正規化 |
-| 06_attention | Attention による文脈の理解 |
-| 07_mlp | MLP によるトークンの特徴変換 |
-| 08_residual | 残差接続と Transformer Block の構造 |
-| 09_output | LM Head、Weight Tying、サンプリング |
+| [02_tokenizer](02_tokenizer.md) | BPE トークナイザー |
+| [03_spiece](03_spiece.md) | SentencePiece トークナイザー |
+| [04_embedding](04_embedding.md) | トークンIDからベクトルへの変換 |
+| [05_layer_norm](05_layer_norm.md) | Layer Normalization による正規化 |
+| [06_attention](06_attention.md) | Attention による文脈の理解 |
+| [07_mlp](07_mlp.md) | MLP によるトークンの特徴変換 |
+| [08_residual](08_residual.md) | 残差接続と Transformer Block の構造 |
+| [09_output](09_output.md) | LM Head、Weight Tying、サンプリング |

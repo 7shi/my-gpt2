@@ -83,7 +83,7 @@ WPE 形状: (5, 768)    # 各位置の位置ベクトル
 
 ### 実行方法
 ```bash
-uv run experiments/12_embedding.py
+uv run docs/04_embedding.py
 ```
 
 このスクリプトでは、WTE による単語の類似度比較、最近傍探索、ベクトル演算に加え、WPE の位置間類似度と埋め込みの合成を確認できます。

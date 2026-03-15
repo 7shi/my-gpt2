@@ -17,47 +17,17 @@
 
 ## 📚 技術解説
 
-詳細な解説は `docs/` ディレクトリにあります。各コンポーネントの数学的な意味や設計の動機をまとめています。
+`docs/` ディレクトリに、推論パイプラインの処理順序に沿った解説と実験スクリプトがあります。
 
-1. [01_tokenizer.md](docs/01_tokenizer.md): バイトレベル BPE と Unicode マッピング
-2. [02_attention.md](docs/02_attention.md): Multi-Head Attention と 因果マスキング
-3. [03_block.md](docs/03_block.md): Pre-LayerNorm と 残差接続
-4. [04_model_overall.md](docs/04_model_overall.md): 全体構成と 重み共有 (Weight Tying)
-5. [05_spiece.md](docs/05_spiece.md): SentencePiece トークナイザー（ユニグラムモデル）
-
-### 推論パイプライン順の解説
-
-`model.py` の処理順序に沿って、各コンポーネントを実験スクリプト付きで解説しています。
-
-1. [11_overview.md](docs/11_overview.md): 推論パイプラインの全体像
-2. [12_embedding.md](docs/12_embedding.md): Embedding（トークンIDからベクトルへ）
-3. [13_layer_norm.md](docs/13_layer_norm.md): Layer Normalization
-4. [14_attention.md](docs/14_attention.md): Attention（文脈の理解）
-5. [15_mlp.md](docs/15_mlp.md): MLP（トークンの特徴変換）
-6. [16_residual.md](docs/16_residual.md): 残差接続と Transformer Block
-7. [17_output.md](docs/17_output.md): 出力（LM Head、Weight Tying、サンプリング）
-
-## 🧪 実験と体験 (Experiments)
-
-実際の重みを使って、GPT-2 の内部でデータがどのように変化していくかを段階的に体験できるスクリプトと解説です。
-
-1. [01_embedding.md](experiments/01_embedding.md): 単語をベクトル空間の座標にする
-2. [02_contextual_embedding.md](experiments/02_contextual_embedding.md): 文脈によって座標を動的に変化させる
-3. [03_attention.md](experiments/03_attention.md): 情報を吸い込むための「検索（Q, K, V）」
-4. [04_block.md](experiments/04_block.md): 情報を積み重ね、高次元で「深掘り（MLP）」する
-5. [05_generation.md](experiments/05_generation.md): 最も自然な単語を「確率」で選び出す
-
-### 推論パイプライン順の実験
-
-上記の docs/11〜17 に対応する実験スクリプトです。
-
-1. [11_overview.py](experiments/11_overview.py): パイプライン各段階の形状と統計
-2. [12_embedding.py](experiments/12_embedding.py): コサイン類似度、最近傍探索、ベクトル演算
-3. [13_layer_norm.py](experiments/13_layer_norm.py): 正規化前後の統計比較
-4. [14_attention.py](experiments/14_attention.py): 注目分布と因果マスキング
-5. [15_mlp.py](experiments/15_mlp.py): GELU 活性化と次元変化
-6. [16_residual.py](experiments/16_residual.py): ブロック内処理と文脈付き埋め込み
-7. [17_output.py](experiments/17_output.py): Temperature 比較と自己回帰生成
+1. [01_overview](docs/01_overview.md): 推論パイプラインの全体像（[実験](docs/01_overview.py)）
+2. [02_tokenizer](docs/02_tokenizer.md): バイトレベル BPE と Unicode マッピング
+3. [03_spiece](docs/03_spiece.md): SentencePiece トークナイザー（ユニグラムモデル）
+4. [04_embedding](docs/04_embedding.md): Embedding — トークンIDからベクトルへ（[実験](docs/04_embedding.py)）
+5. [05_layer_norm](docs/05_layer_norm.md): Layer Normalization（[実験](docs/05_layer_norm.py)）
+6. [06_attention](docs/06_attention.md): Attention — 文脈の理解（[実験](docs/06_attention.py)）
+7. [07_mlp](docs/07_mlp.md): MLP — トークンの特徴変換（[実験](docs/07_mlp.py)）
+8. [08_residual](docs/08_residual.md): 残差接続と Transformer Block（[実験](docs/08_residual.py)）
+9. [09_output](docs/09_output.md): 出力 — LM Head、Weight Tying、サンプリング（[実験](docs/09_output.py)）
 
 ## 🔍 GPT-2 の位置づけ
 
@@ -82,8 +52,7 @@ my-gpt2/
 │   │   └── gpt2/                  # make download-gpt2 で生成
 │   └── rinna/
 │       └── japanese-gpt2-small/   # make download-rinna で生成
-├── docs/             # 技術解説ドキュメント (01〜05)
-├── experiments/      # 実験と体験用スクリプト (01〜05)
+├── docs/             # 技術解説ドキュメント (.md) と実験スクリプト (.py)
 ├── tests/            # ユニットテスト
 ├── Makefile          # セットアップと実行の自動化
 └── pyproject.toml    # プロジェクト設定 (hatchling)

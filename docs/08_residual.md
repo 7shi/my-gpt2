@@ -1,6 +1,6 @@
 # 残差接続と Transformer Block
 
-Transformer Block は、Attention（14 参照）と MLP（15 参照）を組み合わせ、**残差接続**で結合した処理単位です。GPT-2 small ではこのブロックを12個積み重ねることで、テキストの高度な意味表現を獲得します。
+Transformer Block は、Attention（06 参照）と MLP（07 参照）を組み合わせ、**残差接続**で結合した処理単位です。GPT-2 small ではこのブロックを12個積み重ねることで、テキストの高度な意味表現を獲得します。
 
 ---
 
@@ -91,7 +91,7 @@ Embedding 層では同一のベクトルですが、Attention によって周囲
 
 ### 実行方法
 ```bash
-uv run experiments/16_residual.py
+uv run docs/08_residual.py
 ```
 
 1ブロック内の各処理ステップの標準偏差、12ブロック全体を通したベクトルの変化、文脈による同一単語の表現の違いを確認できます。

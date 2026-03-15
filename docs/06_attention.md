@@ -2,7 +2,7 @@
 
 Attention は GPT-2 が「文脈」を理解するための最も重要なコンポーネントです。各トークンが他のトークンとの関係性を計算し、文脈を取り込んだベクトルへと自身を更新します。
 
-LayerNorm（13 参照）を適用した後のベクトルに対して、この処理が行われます。
+LayerNorm（05 参照）を適用した後のベクトルに対して、この処理が行われます。
 
 ---
 
@@ -98,7 +98,7 @@ return np.matmul(out, params.w_out) + params.b_out
 
 ### 実行方法
 ```bash
-uv run experiments/14_attention.py
+uv run docs/06_attention.py
 ```
 
 「The quick brown fox jumps over the lazy dog.」を入力し、因果マスキングの動作確認、注目先の分布、複数ヘッド間の注目パターンの違いを観察できます。
