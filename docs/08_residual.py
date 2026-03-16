@@ -40,39 +40,48 @@ def main():
     x_input = x.copy()
     pos = -1  # 最後のトークンのベクトルで観察
     print(f"  (最後のトークン '{tokens[-1].strip()}' の768次元ベクトルの標準偏差)")
-    print(f"  入力              標準偏差: {np.std(x_input[0, pos]):.4f}")
+    print()
+    print(f"|ステップ | 標準偏差 | 備考 |")
+    print(f"|---|---|---|")
+
+    print(f"|入力 | {np.std(x_input[0, pos]):.4f} | |")
 
     x_ln1 = layer_norm(x_input, block.ln_1)
-    print(f"  LayerNorm 1 後    標準偏差: {np.std(x_ln1[0, pos]):.4f}")
+    print(f"|LayerNorm 1 後 | {np.std(x_ln1[0, pos]):.4f} | |")
 
     x_attn = mha(x_ln1, block.attn, n_head=n_head)
-    print(f"  Attention 出力    標準偏差: {np.std(x_attn[0, pos]):.4f}")
+    print(f"|Attention 出力 | {np.std(x_attn[0, pos]):.4f} | |")
 
     x_res1 = x_input + x_attn
-    print(f"  残差接続 1 後     標準偏差: {np.std(x_res1[0, pos]):.4f}  (入力 + Attention)")
+    print(f"|残差接続 1 後 | {np.std(x_res1[0, pos]):.4f} | 入力 + Attention |")
 
     x_ln2 = layer_norm(x_res1, block.ln_2)
-    print(f"  LayerNorm 2 後    標準偏差: {np.std(x_ln2[0, pos]):.4f}")
+    print(f"|LayerNorm 2 後 | {np.std(x_ln2[0, pos]):.4f} | |")
 
     x_mlp = mlp(x_ln2, block.mlp)
-    print(f"  MLP 出力          標準偏差: {np.std(x_mlp[0, pos]):.4f}")
+    print(f"|MLP 出力 | {np.std(x_mlp[0, pos]):.4f} | |")
 
     x_res2 = x_res1 + x_mlp
-    print(f"  残差接続 2 後     標準偏差: {np.std(x_res2[0, pos]):.4f}  (残差1 + MLP)")
+    print(f"|残差接続 2 後 | {np.std(x_res2[0, pos]):.4f} | 残差1 + MLP |")
 
     # 2. 12ブロック全体の変化
     print("\n" + "=" * 50)
     print("2. 12ブロックを通した表現の変化")
     x_layer = x.copy()
     print(f"  (最後のトークン '{tokens[-1].strip()}' の768次元ベクトルで観察)")
-    print(f"  {'層':>3}  {'標準偏差':>8}  {'Emb からの cos 類似度':>22}")
+    print()
+    print(f"|層 | 標準偏差 | Emb からの cos 類似度 |")
+    print(f"|---|---|---|")
     emb_vec = x[0, -1].copy()  # 最後のトークンの Embedding ベクトル
-    print(f"  Emb  {np.std(x_layer[0, -1]):8.4f}  {1.0:22.4f}")
+    print(f"|Emb | {np.std(x_layer[0, -1]):.4f} | {1.0:.4f} |")
     for i, block_params in enumerate(params.blocks):
         block_obj = TransformerBlock(block_params, n_head)
         x_layer = block_obj(x_layer)
         sim = cosine_similarity(emb_vec, x_layer[0, -1])
-        print(f"  {i:3d}  {np.std(x_layer[0, -1]):8.4f}  {sim:22.4f}")
+        print(f"|{i} | {np.std(x_layer[0, -1]):.4f} | {sim:.4f} |")
+    x_ln_f = layer_norm(x_layer, params.ln_f)
+    sim = cosine_similarity(emb_vec, x_ln_f[0, -1])
+    print(f"|ln_f | {np.std(x_ln_f[0, -1]):.4f} | {sim:.4f} |")
 
     # 3. 文脈による表現の変化
     print("\n" + "=" * 50)
@@ -96,16 +105,25 @@ def main():
             blk = TransformerBlock(bp, n_head)
             xi = blk(xi)
             layer_vecs.append(xi[0, bank_pos].copy())
+        xi_ln = layer_norm(xi, params.ln_f)
+        layer_vecs.append(xi_ln[0, bank_pos].copy())
         vecs_by_layer.append(layer_vecs)
 
     print(f"  文A: '{texts[0]}'")
     print(f"  文B: '{texts[1]}'")
     print(f"  比較対象: '{target_word}' のベクトル")
-    print(f"\n  {'層':>3}  {'文A-文B cos 類似度':>20}")
-    for layer_idx in range(13):
+    print()
+    print(f"|層 | 文A-文B cos 類似度 |")
+    print(f"|---|---|")
+    for layer_idx in range(14):
         sim = cosine_similarity(vecs_by_layer[0][layer_idx], vecs_by_layer[1][layer_idx])
-        label = "Emb" if layer_idx == 0 else f"{layer_idx-1:3d}"
-        print(f"  {label:>3}  {sim:20.4f}")
+        if layer_idx == 0:
+            label = "Emb"
+        elif layer_idx == 13:
+            label = "ln_f"
+        else:
+            label = str(layer_idx - 1)
+        print(f"|{label} | {sim:.4f} |")
 
     # 4. 文章レベルの埋め込み
     print("\n" + "=" * 50)
@@ -135,10 +153,14 @@ def main():
             xi = layer_norm(xi, params.ln_f)
         return xi[0, -1].copy()
 
-    def show_similarity(sent_vecs, query_idx=0):
+    def show_ranking(results):
+        for rank, (sim, s) in enumerate(results, 1):
+            print(f"  {rank:2d}. {sim:7.4f}  {s}")
+
+    def show_similarity(sent_vecs, label="", query_idx=0):
         query_text, query_vec = sent_vecs[query_idx]
-        print(f"\n  基準文: '{query_text}'")
-        print(f"  {'cos 類似度':>10}  文")
+        label_str = f"（{label}）" if label else ""
+        print(f"\n  基準文: '{query_text}'{label_str}")
         results = []
         for i, (s, v) in enumerate(sent_vecs):
             if i == query_idx:
@@ -146,21 +168,19 @@ def main():
             sim = cosine_similarity(query_vec, v)
             results.append((sim, s))
         results.sort(reverse=True)
-        for sim, s in results:
-            print(f"  {sim:10.4f}  {s}")
+        show_ranking(results)
 
     def show_keyword_search(sent_vecs, keywords, use_ln_f=False):
+        label = "LayerNorm あり" if use_ln_f else "LayerNorm なし"
         for kw in keywords:
             kw_vec = get_sentence_vector(kw, use_ln_f=use_ln_f)
-            print(f"\n  キーワード: '{kw}'")
-            print(f"  {'cos 類似度':>10}  文")
+            print(f"\n  キーワード: '{kw}'（{label}）")
             results = []
             for s, v in sent_vecs:
                 sim = cosine_similarity(kw_vec, v)
                 results.append((sim, s))
             results.sort(reverse=True)
-            for sim, s in results:
-                print(f"  {sim:10.4f}  {s}")
+            show_ranking(results)
 
     keywords = ["animal", "finance", "programming"]
 
@@ -170,7 +190,7 @@ def main():
     sent_vecs = [(s, get_sentence_vector(s)) for s in sentences]
 
     print("\n  [文章間の類似度]")
-    show_similarity(sent_vecs)
+    show_similarity(sent_vecs, "LayerNorm なし")
 
     print(f"\n  [キーワード検索]")
     show_keyword_search(sent_vecs, keywords)
@@ -181,7 +201,7 @@ def main():
     sent_vecs_ln = [(s, get_sentence_vector(s, use_ln_f=True)) for s in sentences]
 
     print("\n  [文章間の類似度]")
-    show_similarity(sent_vecs_ln)
+    show_similarity(sent_vecs_ln, "LayerNorm あり")
 
     print(f"\n  [キーワード検索]")
     show_keyword_search(sent_vecs_ln, keywords, use_ln_f=True)
