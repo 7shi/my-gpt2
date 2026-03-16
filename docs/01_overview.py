@@ -36,12 +36,12 @@ print(f"  平均: {np.mean(x):.4f}, 標準偏差: {np.std(x):.4f}")
 # ステップ 2: Transformer Block × 12
 print("\n" + "=" * 50)
 print("Step 2: Transformer Block × 12")
-print(f"  {'層':>3}  {'平均':>8}  {'標準偏差':>8}")
-print(f"  {'---':>3}  {'------':>8}  {'--------':>8}")
+print(f"| {'層'} | {'平均'} | {'標準偏差'} |")
+print(f"|---|---|---|")
 for i, block_params in enumerate(params.blocks):
     block = TransformerBlock(block_params, n_head)
     x = block(x)
-    print(f"  {i:3d}  {np.mean(x):8.4f}  {np.std(x):8.4f}")
+    print(f"| {i} | {np.mean(x):.4f} | {np.std(x):.4f} |")
 
 # ステップ 3: 最終 LayerNorm
 print("\n" + "=" * 50)
