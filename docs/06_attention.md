@@ -1,4 +1,4 @@
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | **6** | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md)
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | **6** | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | [10](10_architecture.md)
 
 ---
 
@@ -120,4 +120,4 @@ uv run docs/06_attention.py
 
 ---
 
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | **6** | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md)
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | **6** | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | [10](10_architecture.md)

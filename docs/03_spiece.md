@@ -1,4 +1,4 @@
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | **3** | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md)
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | **3** | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | [10](10_architecture.md)
 
 ---
 
@@ -466,4 +466,4 @@ uv run model2vocab weights/rinna/japanese-gpt2-small/spiece.model -o vocab.txt
 
 ---
 
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | **3** | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md)
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | **3** | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | [10](10_architecture.md)

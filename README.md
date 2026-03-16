@@ -30,6 +30,7 @@
 | [07_mlp](docs/07_mlp.md) | MLP — トークンの特徴変換 | [実験](docs/07_mlp.py) |
 | [08_residual](docs/08_residual.md) | 残差接続と Transformer Block | [実験](docs/08_residual.py) |
 | [09_output](docs/09_output.md) | 出力 — LM Head、Weight Tying、サンプリング | [実験](docs/09_output.py) |
+| [10_architecture](docs/10_architecture.md) | アーキテクチャ — GPT-2 の設計思想 | |
 
 ## 🔍 GPT-2 の位置づけ
 
