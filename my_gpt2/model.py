@@ -6,12 +6,36 @@ class LayerNormParams:
     g: np.ndarray
     b: np.ndarray
 
+    def __call__(self, x, eps=1e-5):
+        mean = np.mean(x, axis=-1, keepdims=True)
+        variance = np.var(x, axis=-1, keepdims=True)
+        return self.g * (x - mean) / np.sqrt(variance + eps) + self.b
+
 @dataclass
 class AttentionParams:
     w_qkv: np.ndarray
     b_qkv: np.ndarray
     w_out: np.ndarray
     b_out: np.ndarray
+    n_head: int = None
+
+    def __call__(self, x, n_head=None):
+        n_head = n_head or self.n_head
+        batch_size, seq_len, embed_dim = x.shape
+        qkv = np.matmul(x, self.w_qkv) + self.b_qkv
+
+        q, k, v = np.split(qkv, 3, axis=-1)
+        head_size = embed_dim // n_head
+
+        def split_heads(tensor):
+            return tensor.reshape(batch_size, seq_len, n_head, head_size).transpose(0, 2, 1, 3)
+
+        q, k, v = map(split_heads, [q, k, v])
+        mask = np.tril(np.ones((seq_len, seq_len)))
+        out = attention(q, k, v, mask=mask)
+
+        out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
+        return np.matmul(out, self.w_out) + self.b_out
 
 @dataclass
 class MLPParams:
@@ -19,6 +43,10 @@ class MLPParams:
     b_fc: np.ndarray
     w_proj: np.ndarray
     b_proj: np.ndarray
+
+    def __call__(self, x):
+        a = gelu(np.matmul(x, self.w_fc) + self.b_fc)
+        return np.matmul(a, self.w_proj) + self.b_proj
 
 @dataclass
 class BlockParams:
@@ -66,51 +94,22 @@ def attention(q, k, v, mask=None):
     probs = softmax(scores)
     return np.matmul(probs, v)
 
-def mha(x, params: AttentionParams, n_head):
-    """
-    マルチヘッドアテンション。
-    x: 入力テンソル (batch_size, seq_len, embed_dim)
-    params: AttentionParams (w_qkv, b_qkv, w_out, b_out)
-    n_head: アテンションヘッド数
-    """
-    batch_size, seq_len, embed_dim = x.shape
-    qkv = np.matmul(x, params.w_qkv) + params.b_qkv
-
-    q, k, v = np.split(qkv, 3, axis=-1)
-    head_size = embed_dim // n_head
-
-    def split_heads(tensor):
-        return tensor.reshape(batch_size, seq_len, n_head, head_size).transpose(0, 2, 1, 3)
-
-    q, k, v = map(split_heads, [q, k, v])
-    mask = np.tril(np.ones((seq_len, seq_len)))
-    out = attention(q, k, v, mask=mask)
-
-    out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
-    return np.matmul(out, params.w_out) + params.b_out
-
-def mlp(x, params: MLPParams):
-    """
-    フィードフォワードネットワーク（MLP）。
-    x: 入力テンソル (batch_size, seq_len, embed_dim)
-    params: MLPParams (w_fc, b_fc, w_proj, b_proj)
-    """
-    a = gelu(np.matmul(x, params.w_fc) + params.b_fc)
-    return np.matmul(a, params.w_proj) + params.b_proj
-
 class TransformerBlock:
     """
     GPT-2 トランスフォーマーブロック。
     """
     def __init__(self, params: BlockParams, n_head):
-        self.params = params
-        self.n_head = n_head
+        self.ln_1 = params.ln_1
+        self.attn = params.attn
+        self.attn.n_head = n_head
+        self.ln_2 = params.ln_2
+        self.mlp = params.mlp
 
     def __call__(self, x):
         # アテンション + 残差接続（Pre-LayerNorm）
-        x = x + mha(layer_norm(x, self.params.ln_1), self.params.attn, n_head=self.n_head)
+        x = x + self.attn(self.ln_1(x))
         # MLP + 残差接続（Pre-LayerNorm）
-        x = x + mlp(layer_norm(x, self.params.ln_2), self.params.mlp)
+        x = x + self.mlp(self.ln_2(x))
         return x
 
 class GPT2:
@@ -119,6 +118,7 @@ class GPT2:
     """
     def __init__(self, params: GPT2Params, n_head):
         self.params = params
+        self.ln_f = params.ln_f
         self.blocks = [TransformerBlock(p, n_head) for p in params.blocks]
 
     def __call__(self, input_ids):
@@ -132,21 +132,11 @@ class GPT2:
             x = block(x)
 
         # 最終LayerNorm
-        x = layer_norm(x, self.params.ln_f)
+        x = self.ln_f(x)
 
         # 言語モデルヘッド（重み共有）
         # 語彙サイズに射影: (batch_size, seq_len, vocab_size)
         return np.matmul(x, self.params.wte.T)
-
-def layer_norm(x, params: LayerNormParams, eps=1e-5):
-    """
-    レイヤー正規化。
-    x: 入力配列
-    params: LayerNormParams (g: ゲイン（ガンマ）、b: バイアス（ベータ）)
-    """
-    mean = np.mean(x, axis=-1, keepdims=True)
-    variance = np.var(x, axis=-1, keepdims=True)
-    return params.g * (x - mean) / np.sqrt(variance + eps) + params.b
 
 def main():
     print("GPT-2の基本関数が実装されています。")

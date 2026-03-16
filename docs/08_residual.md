@@ -44,8 +44,8 @@ MLP        │
 ```python
 class TransformerBlock:
     def __call__(self, x):
-        x = x + mha(layer_norm(x, self.params.ln_1), self.params.attn, n_head=self.n_head)
-        x = x + mlp(layer_norm(x, self.params.ln_2), self.params.mlp)
+        x = x + self.attn(self.ln_1(x))
+        x = x + self.mlp(self.ln_2(x))
         return x
 ```
 

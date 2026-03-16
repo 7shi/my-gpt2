@@ -1,7 +1,7 @@
 import numpy as np
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import layer_norm, mha, mlp, TransformerBlock
+from my_gpt2.model import TransformerBlock
 import os
 import sys
 
@@ -46,19 +46,19 @@ def main():
 
     print(f"|入力 | {np.std(x_input[0, pos]):.4f} | |")
 
-    x_ln1 = layer_norm(x_input, block.ln_1)
+    x_ln1 = block.ln_1(x_input)
     print(f"|LayerNorm 1 後 | {np.std(x_ln1[0, pos]):.4f} | |")
 
-    x_attn = mha(x_ln1, block.attn, n_head=n_head)
+    x_attn = block.attn(x_ln1, n_head=n_head)
     print(f"|Attention 出力 | {np.std(x_attn[0, pos]):.4f} | |")
 
     x_res1 = x_input + x_attn
     print(f"|残差接続 1 後 | {np.std(x_res1[0, pos]):.4f} | 入力 + Attention |")
 
-    x_ln2 = layer_norm(x_res1, block.ln_2)
+    x_ln2 = block.ln_2(x_res1)
     print(f"|LayerNorm 2 後 | {np.std(x_ln2[0, pos]):.4f} | |")
 
-    x_mlp = mlp(x_ln2, block.mlp)
+    x_mlp = block.mlp(x_ln2)
     print(f"|MLP 出力 | {np.std(x_mlp[0, pos]):.4f} | |")
 
     x_res2 = x_res1 + x_mlp
@@ -79,7 +79,7 @@ def main():
         x_layer = block_obj(x_layer)
         sim = cosine_similarity(emb_vec, x_layer[0, -1])
         print(f"|{i} | {np.std(x_layer[0, -1]):.4f} | {sim:.4f} |")
-    x_ln_f = layer_norm(x_layer, params.ln_f)
+    x_ln_f = params.ln_f(x_layer)
     sim = cosine_similarity(emb_vec, x_ln_f[0, -1])
     print(f"|ln_f | {np.std(x_ln_f[0, -1]):.4f} | {sim:.4f} |")
 
@@ -105,7 +105,7 @@ def main():
             blk = TransformerBlock(bp, n_head)
             xi = blk(xi)
             layer_vecs.append(xi[0, bank_pos].copy())
-        xi_ln = layer_norm(xi, params.ln_f)
+        xi_ln = params.ln_f(xi)
         layer_vecs.append(xi_ln[0, bank_pos].copy())
         vecs_by_layer.append(layer_vecs)
 
@@ -150,7 +150,7 @@ def main():
             blk = TransformerBlock(bp, n_head)
             xi = blk(xi)
         if use_ln_f:
-            xi = layer_norm(xi, params.ln_f)
+            xi = params.ln_f(xi)
         return xi[0, -1].copy()
 
     def show_ranking(results):

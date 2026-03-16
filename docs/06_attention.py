@@ -1,7 +1,7 @@
 import numpy as np
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import softmax, layer_norm
+from my_gpt2.model import softmax
 import os
 import sys
 
@@ -44,7 +44,7 @@ def main():
     # Embedding + LayerNorm
     x = params.wte[input_ids] + params.wpe[np.arange(len(input_ids))]
     x = x[np.newaxis, ...]
-    x_norm = layer_norm(x, params.blocks[0].ln_1)
+    x_norm = params.blocks[0].ln_1(x)
 
     # Attention スコアを計算
     attn_params = params.blocks[0].attn

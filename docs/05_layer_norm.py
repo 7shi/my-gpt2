@@ -1,7 +1,7 @@
 import numpy as np
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import layer_norm
+from my_gpt2.model import LayerNormParams
 import os
 import sys
 
@@ -53,7 +53,7 @@ def main():
     print("\n" + "=" * 50)
     print("3. LayerNorm 適用後（γ でスケール、β でシフト）")
     ln_1 = params.blocks[0].ln_1
-    x_ln = layer_norm(x, ln_1)
+    x_ln = ln_1(x)
     print(f"  {'トークン':>12}  {'平均':>10}  {'分散':>10}")
     for i, tok in enumerate(tokens):
         vec = x_ln[0, i]

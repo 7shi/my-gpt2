@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from my_gpt2.model import mha, AttentionParams
+from my_gpt2.model import AttentionParams
 
 def test_mha_shape():
     batch_size, seq_len, embed_dim = 1, 10, 768 # GPT-2 small
@@ -14,7 +14,7 @@ def test_mha_shape():
         b_out=np.zeros(embed_dim),
     )
 
-    out = mha(x, params, n_head)
+    out = params(x, n_head=n_head)
 
     assert out.shape == (batch_size, seq_len, embed_dim)
 
@@ -31,13 +31,13 @@ def test_mha_causal():
         b_out=np.zeros(embed_dim),
     )
 
-    out1 = mha(x1, params, n_head)
+    out1 = params(x1, n_head=n_head)
 
     # 入力の最後のトークンを変更
     x2 = x1.copy()
     x2[:, -1, :] += 10.0
 
-    out2 = mha(x2, params, n_head)
+    out2 = params(x2, n_head=n_head)
 
     # 因果性: 最初の3トークンは変化しないはず
     assert np.allclose(out1[:, :3, :], out2[:, :3, :])

@@ -62,7 +62,7 @@ def __call__(self, input_ids):
         x = block(x)
 
     # Step 3: 最終 LayerNorm — 出力前の正規化
-    x = layer_norm(x, self.params.ln_f)
+    x = self.ln_f(x)
 
     # Step 4: LM Head — ベクトルを語彙サイズの確率分布に変換（Weight Tying）
     return np.matmul(x, self.params.wte.T)

@@ -1,7 +1,7 @@
 import numpy as np
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import GPT2, TransformerBlock, layer_norm, softmax
+from my_gpt2.model import GPT2, TransformerBlock, softmax
 import os
 import sys
 
@@ -48,7 +48,7 @@ def main():
     # ステップ 3: 最終 LayerNorm
     print("\n" + "=" * 50)
     print("Step 3: 最終 LayerNorm")
-    x = layer_norm(x, params.ln_f)
+    x = params.ln_f(x)
     print(f"  形状: {x.shape}")
     print(f"  平均: {np.mean(x):.4f}, 標準偏差: {np.std(x):.4f}")
 

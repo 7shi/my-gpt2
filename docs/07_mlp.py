@@ -1,7 +1,7 @@
 import numpy as np
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import layer_norm, mha, mlp, gelu
+from my_gpt2.model import gelu
 import os
 import sys
 
@@ -30,8 +30,8 @@ def main():
     x = params.wte[input_ids] + params.wpe[np.arange(len(input_ids))]
     x = x[np.newaxis, ...]
     block = params.blocks[0]
-    x_after_attn = x + mha(layer_norm(x, block.ln_1), block.attn, n_head=n_head)
-    x_ln2 = layer_norm(x_after_attn, block.ln_2)
+    x_after_attn = x + block.attn(block.ln_1(x), n_head=n_head)
+    x_ln2 = block.ln_2(x_after_attn)
 
     print(f"\n入力: '{text}'")
     print(f"トークン: {tokens}")
@@ -62,7 +62,7 @@ def main():
     # 3. MLP 前後のベクトル変化
     print("\n" + "=" * 50)
     print("3. MLP 前後のベクトル変化")
-    x_mlp = mlp(x_ln2, block.mlp)
+    x_mlp = block.mlp(x_ln2)
     print(f"  {'トークン':>12}  {'入力std':>8}  {'出力std':>8}  {'コサイン類似度':>14}")
     for i, tok in enumerate(tokens):
         v_in = x_ln2[0, i]

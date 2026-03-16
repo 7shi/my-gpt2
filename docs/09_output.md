@@ -12,7 +12,7 @@ Transformer Block の出力に最終 LayerNorm を適用した後、**Weight Tyi
 
 ```python
 # 最終 LayerNorm
-x = layer_norm(x, self.params.ln_f)
+x = self.ln_f(x)
 
 # LM Head: WTE の転置行列を掛ける (Weight Tying)
 return np.matmul(x, self.params.wte.T)

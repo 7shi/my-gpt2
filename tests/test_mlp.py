@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from my_gpt2.model import mlp, MLPParams
+from my_gpt2.model import MLPParams
 
 def test_mlp_shape():
     batch_size, seq_len, embed_dim = 1, 10, 768
@@ -13,7 +13,7 @@ def test_mlp_shape():
         b_proj=np.zeros(embed_dim),
     )
 
-    out = mlp(x, params)
+    out = params(x)
 
     assert out.shape == (batch_size, seq_len, embed_dim)
 
@@ -30,12 +30,12 @@ def test_mlp_independence():
         b_proj=np.zeros(embed_dim),
     )
 
-    out1 = mlp(x1, params)
+    out1 = params(x1)
 
     x2 = x1.copy()
     x2[:, 1, :] += 10.0 # 2番目のトークンを変更
 
-    out2 = mlp(x2, params)
+    out2 = params(x2)
 
     # 1番目のトークンの出力は同一のはず
     assert np.allclose(out1[:, 0, :], out2[:, 0, :])
