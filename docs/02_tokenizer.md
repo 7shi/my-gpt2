@@ -8,10 +8,29 @@
 
 GPT-2は文字単位でも単語単位でもなく、「頻出するバイト列の塊」を学習によってトークンとして定義する BPE（Byte Pair Encoding）方式を採用しています。これにより、未知語をゼロにしながら、語彙を効率的なサイズに抑えることができます。
 
+1. テキスト
+   - トークナイザー
+     - **BPE** ← この章
+     - [SentencePiece](03_spiece.md)
+2. トークンID列
+   - [Embedding](04_embedding.md)
+3. ベクトル列 (seq_len, 768)
+   - Transformer Block × 12
+     - [LayerNorm](05_layer_norm.md)
+     - [Attention](06_attention.md)
+     - [残差接続](08_residual.md)
+     - [LayerNorm](05_layer_norm.md)
+     - [MLP](07_mlp.md)
+     - [残差接続](08_residual.md)
+   - [LayerNorm](05_layer_norm.md)
+   - [LM Head](09_output.md)
+4. ロジット (seq_len, 50257)
+   - [サンプリング](09_output.md)
+5. 次のトークン
+
 ## ステップ 1: 正規表現による事前分割 (Pre-tokenization)
 
-BPEを適用する前に、テキストを「単語の塊」に分割します。
-これは、句読点と単語が混ざって結合されたり、スペースが消えたりするのを防ぐためです。
+BPEを適用する前に、テキストを「単語の塊」に分割します。これは、句読点と単語が混ざって結合されたり、スペースが消えたりするのを防ぐためです。
 
 ```python
 # GPT-2専用の正規表現

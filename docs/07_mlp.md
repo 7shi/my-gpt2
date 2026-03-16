@@ -4,9 +4,27 @@
 
 # MLP: トークンの特徴変換
 
-MLP（Multi-Layer Perceptron）は、各トークンを独立に処理する特徴変換です。Attention が「トークン間の関係」を扱うのに対し、MLP は「トークン単体の意味の深掘り」を担当します。
+MLP（Multi-Layer Perceptron）は、各トークンを独立に処理する特徴変換です。Attention が「トークン間の関係」を扱うのに対し、MLP は「トークン単体の意味の深掘り」を担当します。LayerNorm を適用した後のベクトルに対して、この処理が行われます。
 
-LayerNorm を適用した後のベクトルに対して、この処理が行われます。
+1. テキスト
+   - トークナイザー
+     - [BPE](02_tokenizer.md)
+     - [SentencePiece](03_spiece.md)
+2. トークンID列
+   - [Embedding](04_embedding.md)
+3. ベクトル列 (seq_len, 768)
+   - Transformer Block × 12
+     - [LayerNorm](05_layer_norm.md)
+     - [Attention](06_attention.md)
+     - [残差接続](08_residual.md)
+     - [LayerNorm](05_layer_norm.md)
+     - **MLP** ← この章
+     - [残差接続](08_residual.md)
+   - [LayerNorm](05_layer_norm.md)
+   - [LM Head](09_output.md)
+4. ロジット (seq_len, 50257)
+   - [サンプリング](09_output.md)
+5. 次のトークン
 
 ## 1. 次元の拡張と圧縮
 

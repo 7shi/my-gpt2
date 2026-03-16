@@ -6,6 +6,26 @@
 
 Transformer Block 内の各処理（Attention、MLP）の前に、入力ベクトルを正規化する **LayerNorm** が適用されます。GPT-2 全体で合計25回使われる基礎的な処理です。
 
+1. テキスト
+   - トークナイザー
+     - [BPE](02_tokenizer.md)
+     - [SentencePiece](03_spiece.md)
+2. トークンID列
+   - [Embedding](04_embedding.md)
+3. ベクトル列 (seq_len, 768)
+   - Transformer Block × 12
+     - **LayerNorm** ← この章
+     - [Attention](06_attention.md)
+     - [残差接続](08_residual.md)
+     - **LayerNorm** ← この章
+     - [MLP](07_mlp.md)
+     - [残差接続](08_residual.md)
+   - **LayerNorm** ← この章
+   - [LM Head](09_output.md)
+4. ロジット (seq_len, 50257)
+   - [サンプリング](09_output.md)
+5. 次のトークン
+
 ## 1. LayerNorm の仕組み
 
 LayerNorm は、各トークンのベクトル（768次元）を **平均0・分散1** に正規化してから、学習可能なパラメータ **γ**（スケール）と **β**（シフト）を適用します。

@@ -6,6 +6,26 @@
 
 12層の Transformer Block を通過したベクトルは、最終的に「次の単語の確率分布」に変換されます。このドキュメントでは、出力層（LM Head）とサンプリング手法を解説します。
 
+1. テキスト
+   - トークナイザー
+     - [BPE](02_tokenizer.md)
+     - [SentencePiece](03_spiece.md)
+2. トークンID列
+   - [Embedding](04_embedding.md)
+3. ベクトル列 (seq_len, 768)
+   - Transformer Block × 12
+     - [LayerNorm](05_layer_norm.md)
+     - [Attention](06_attention.md)
+     - [残差接続](08_residual.md)
+     - [LayerNorm](05_layer_norm.md)
+     - [MLP](07_mlp.md)
+     - [残差接続](08_residual.md)
+   - [LayerNorm](05_layer_norm.md)
+   - **LM Head** ← この章
+4. ロジット (seq_len, 50257)
+   - **サンプリング** ← この章
+5. 次のトークン
+
 ## 1. 最終 LayerNorm と LM Head
 
 Transformer Block の出力に最終 LayerNorm を適用した後、**Weight Tying** によって語彙サイズの確率分布に変換します。

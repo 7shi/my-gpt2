@@ -4,9 +4,27 @@
 
 # Attention: 文脈の理解
 
-Attention は GPT-2 が「文脈」を理解するための最も重要なコンポーネントです。各トークンが他のトークンとの関係性を計算し、文脈を取り込んだベクトルへと自身を更新します。
+Attention は GPT-2 が「文脈」を理解するための最も重要なコンポーネントです。各トークンが他のトークンとの関係性を計算し、文脈を取り込んだベクトルへと自身を更新します。LayerNorm（[05](05_layer_norm.md) 参照）を適用した後のベクトルに対して、この処理が行われます。
 
-LayerNorm（05 参照）を適用した後のベクトルに対して、この処理が行われます。
+1. テキスト
+   - トークナイザー
+     - [BPE](02_tokenizer.md)
+     - [SentencePiece](03_spiece.md)
+2. トークンID列
+   - [Embedding](04_embedding.md)
+3. ベクトル列 (seq_len, 768)
+   - Transformer Block × 12
+     - [LayerNorm](05_layer_norm.md)
+     - **Attention** ← この章
+     - [残差接続](08_residual.md)
+     - [LayerNorm](05_layer_norm.md)
+     - [MLP](07_mlp.md)
+     - [残差接続](08_residual.md)
+   - [LayerNorm](05_layer_norm.md)
+   - [LM Head](09_output.md)
+4. ロジット (seq_len, 50257)
+   - [サンプリング](09_output.md)
+5. 次のトークン
 
 ## 1. Q, K, V（Query, Key, Value）
 

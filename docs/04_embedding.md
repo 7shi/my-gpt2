@@ -6,6 +6,26 @@
 
 GPT-2 の推論パイプラインの最初のステップは、トークンID（整数）をベクトル（数値のリスト）に変換する **Embedding** です。GPT-2 では、単語の意味と位置の2つのベクトルを足し合わせます。
 
+1. テキスト
+   - トークナイザー
+     - [BPE](02_tokenizer.md)
+     - [SentencePiece](03_spiece.md)
+2. トークンID列
+   - **Embedding** ← この章
+3. ベクトル列 (seq_len, 768)
+   - Transformer Block × 12
+     - [LayerNorm](05_layer_norm.md)
+     - [Attention](06_attention.md)
+     - [残差接続](08_residual.md)
+     - [LayerNorm](05_layer_norm.md)
+     - [MLP](07_mlp.md)
+     - [残差接続](08_residual.md)
+   - [LayerNorm](05_layer_norm.md)
+   - [LM Head](09_output.md)
+4. ロジット (seq_len, 50257)
+   - [サンプリング](09_output.md)
+5. 次のトークン
+
 ## 1. WTE（Word Token Embedding）: 単語の意味
 
 WTE は語彙中の各トークンに対応するベクトルを格納した行列です。

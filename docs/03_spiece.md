@@ -6,6 +6,26 @@
 
 `rinna/japanese-gpt2-small` は BPE ではなく SentencePiece の**Unigramモデル**を使用します。`my_gpt2/spiece.py` では、外部ライブラリなしに `spiece.model` を直接読み込んでエンコード・デコードを行います。
 
+1. テキスト
+   - トークナイザー
+     - [BPE](02_tokenizer.md)
+     - **SentencePiece** ← この章
+2. トークンID列
+   - [Embedding](04_embedding.md)
+3. ベクトル列 (seq_len, 768)
+   - Transformer Block × 12
+     - [LayerNorm](05_layer_norm.md)
+     - [Attention](06_attention.md)
+     - [残差接続](08_residual.md)
+     - [LayerNorm](05_layer_norm.md)
+     - [MLP](07_mlp.md)
+     - [残差接続](08_residual.md)
+   - [LayerNorm](05_layer_norm.md)
+   - [LM Head](09_output.md)
+4. ロジット (seq_len, 50257)
+   - [サンプリング](09_output.md)
+5. 次のトークン
+
 ## Unigramモデルとは？
 
 **Unigramモデル**とは、語彙内の各ピース（部分文字列）に「出現確率の対数（log probability）」をスコアとして持たせ、テキストを「スコアの合計が最大になるピース列」に分割するアルゴリズムです。「Unigram」とは各ピースを独立に扱う（前後のピースに依存しない）確率モデルであることを意味します。最適分割の探索には動的計画法の一種である Viterbi アルゴリズムを用います（ステップ 3 で詳述）。
