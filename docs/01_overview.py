@@ -24,41 +24,45 @@ tokens = [tokenizer.decode([i]) for i in input_ids]
 
 print(f"\n入力: '{text}'")
 
-# ステップ 1: トークナイザー
+# ステップ 0: トークナイザー
 print("\n" + "=" * 50)
-print("Step 1: トークナイザー")
+print("Step 0: トークナイザー")
 print(f"  トークン: {tokens}")
 print(f"  トークンID: {input_ids}")
 
-# ステップ 2: Embedding
+# ステップ 1: Embedding
 print("\n" + "=" * 50)
-print("Step 2: Embedding (トークン埋め込み + 位置埋め込み)")
+print("Step 1: Embedding (トークン埋め込み + 位置埋め込み)")
 x = params.wte[input_ids] + params.wpe[np.arange(len(input_ids))]
 print(f"  形状: {x.shape}  (トークン数, 埋め込み次元)")
 print(f"  平均: {np.mean(x):.4f}, 標準偏差: {np.std(x):.4f}")
 
-# ステップ 3: Transformer Block × 12 + LayerNorm
+# ステップ 2: Transformer Block × 12
 print("\n" + "=" * 50)
-print("Step 3: Transformer Block × 12 + LayerNorm")
+print("Step 2: Transformer Block × 12")
 print(f"| {'層'} | {'平均'} | {'標準偏差'} |")
 print(f"|---:|---:|---:|")
 for i, block_params in enumerate(params.blocks):
     block = TransformerBlock(block_params, n_head)
     x = block(x)
     print(f"| {i} | {np.mean(x):.4f} | {np.std(x):.4f} |")
+
+# ステップ 3: 最終 LayerNorm
+print("\n" + "=" * 50)
+print("Step 3: 最終 LayerNorm")
 x = params.ln_f(x)
-print(f"| ln_f | {np.mean(x):.4f} | {np.std(x):.4f} |")
+print(f"  平均: {np.mean(x):.4f}, 標準偏差: {np.std(x):.4f}")
 
 # ステップ 4: LM Head (Weight Tying)
 print("\n" + "=" * 50)
 print("Step 4: LM Head (Weight Tying: x @ wte.T)")
-next_token_logits = x[-1] @ params.wte.T
-print(f"  形状: {next_token_logits.shape}  (語彙数,)")
+logits = x @ params.wte.T
+print(f"  形状: {logits.shape}  (トークン数, 語彙数)")
 
-# 次のトークンの予測結果
+# ステップ 5: サンプリング
 print("\n" + "=" * 50)
-print(f"予測結果: '{text}' の次のトークン上位5件")
-probs = softmax(next_token_logits)
+print(f"Step 5: サンプリング — '{text}' の次のトークン上位5件")
+probs = softmax(logits[-1])
 top_indices = np.flip(np.argsort(probs))[:5]
 for i, idx in enumerate(top_indices):
     token = tokenizer.decode([int(idx)])
@@ -73,6 +77,6 @@ for _ in range(20):
     for block_params in params.blocks:
         x = TransformerBlock(block_params, n_head)(x)
     x = params.ln_f(x)
-    next_id = int(np.argmax(x[-1] @ params.wte.T))
+    next_id = int(np.argmax((x @ params.wte.T)[-1]))
     generated.append(next_id)
 print(f"> {tokenizer.decode(generated)}")
