@@ -412,6 +412,16 @@ print(ids)          # [9, 5361, 31082, 11, 4324, 27, 8]
 print(t.decode(ids))  # '吾輩は猫である。'
 ```
 
+## 実験：SentencePiece トークナイザーの動作を確認
+
+正規化・spiece.model バイナリ上の "日本語" エントリのオフセット検索・Viterbi トレース（各位置での採用/棄却とバックトラック）・encode/decode の一連の流れを確認します。実行結果は本文中で引用しています。
+
+**実行方法**: ([03_spiece.py](03_spiece.py))
+
+```bash
+uv run docs/03_spiece.py
+```
+
 ## 付録: .model と .vocab の関係
 
 `spiece.model` は推論に使うバイナリ（protobuf）です。内容を人間が読める形で確認したい場合は、語彙部分をタブ区切りテキストに変換した `.vocab` ファイルを使います。

@@ -246,6 +246,16 @@ is     (ID   271)  /  Ġis    (ID   318)
 
 この設計の主な目的はトークン数の削減です。スペースを独立したトークンにすると約40%トークン数が増えるため、スペースを後続の単語に吸収することで効率化しています。副産物として `'Hello'`（文頭）と `'ĠHello'`（文中）が別IDになり、モデルが位置情報を暗黙的に学習できるという利点もあります。一方で、語彙の多くがスペース付き・なしの対で占められる非効率もあり、後継モデルでは SentencePiece や tiktoken による改善が図られています。
 
+## 実験：BPE トークナイザーの動作を確認
+
+事前分割・bytes_to_unicode マッピング・BPE マージ過程（"Hello" を例に各ステップのランクと中間状態）・encode/decode の一連の流れを確認します。実行結果は本文中で引用しています。
+
+**実行方法**: ([02_tokenizer.py](02_tokenizer.py))
+
+```bash
+uv run docs/02_tokenizer.py
+```
+
 ---
 
 ページ：[1](01_overview.md) | **2** | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md)
