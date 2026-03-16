@@ -22,7 +22,7 @@ GPT-2は文字単位でも単語単位でもなく、「頻出するバイト列
      - [LayerNorm](05_layer_norm.md)
      - [MLP](07_mlp.md)
      - [残差接続](08_residual.md)
-   - [LayerNorm](05_layer_norm.md)
+   - [最終 LayerNorm](08_residual.md)
    - [LM Head](09_output.md)
 4. ロジット (seq_len, 50257)
    - [サンプリング](09_output.md)
