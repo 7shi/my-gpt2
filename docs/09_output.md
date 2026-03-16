@@ -32,7 +32,7 @@
 
 ```python
 # LM Head: WTE の転置行列を掛ける (Weight Tying)
-return np.matmul(x, self.params.wte.T)
+return np.matmul(x, self.wte.T)
 ```
 
 出力は **ロジット（logit）** と呼ばれる生のスコアで、語彙の各トークンに対する「次に来る可能性」を表します。

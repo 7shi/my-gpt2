@@ -12,11 +12,11 @@ GPT-2 の推論は、わずか数行のコードに集約されます。
 
 ```python
 def __call__(self, input_ids):
-    x = self.params.wte[input_ids] + self.params.wpe[np.arange(len(input_ids))]
+    x = self.wte[input_ids] + self.wpe[np.arange(len(input_ids))]
     for block in self.blocks:
         x = block(x)
     x = self.ln_f(x)
-    return np.matmul(x, self.params.wte.T)
+    return np.matmul(x, self.wte.T)
 ```
 
 これを上から読むと、GPT-2 は3つの段階で構成されていることがわかります。

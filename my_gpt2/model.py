@@ -135,7 +135,8 @@ class GPT2:
     GPT-2 モデル。
     """
     def __init__(self, params: GPT2Params, n_head):
-        self.params = params
+        self.wte = params.wte
+        self.wpe = params.wpe
         self.ln_f = params.ln_f
         self.blocks = [TransformerBlock(p, n_head) for p in params.blocks]
 
@@ -151,7 +152,7 @@ class GPT2:
         positions = np.arange(past_len, past_len + seq_len)
 
         # トークン埋め込み + 位置埋め込み
-        x = self.params.wte[input_ids] + self.params.wpe[positions]
+        x = self.wte[input_ids] + self.wpe[positions]
 
         if kv_cache is not _no_cache:
             new_kv_cache = []
@@ -160,7 +161,7 @@ class GPT2:
                 x, layer_cache = block(x, kv_cache=layer_cache)
                 new_kv_cache.append(layer_cache)
             x = self.ln_f(x)
-            return np.matmul(x, self.params.wte.T), new_kv_cache
+            return np.matmul(x, self.wte.T), new_kv_cache
 
         # トランスフォーマーブロック
         for block in self.blocks:
@@ -170,7 +171,7 @@ class GPT2:
         x = self.ln_f(x)
 
         # 言語モデルヘッド（重み共有）
-        return np.matmul(x, self.params.wte.T)
+        return np.matmul(x, self.wte.T)
 
 def main():
     print("GPT-2の基本関数が実装されています。")

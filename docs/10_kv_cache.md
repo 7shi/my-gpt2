@@ -132,7 +132,7 @@ else:
     past_len = 0
 positions = np.arange(past_len, past_len + seq_len)
 
-x = self.params.wte[input_ids] + self.params.wpe[positions]
+x = self.wte[input_ids] + self.wpe[positions]
 ```
 
 例えば、3トークンの prefill 後に新しいトークンを処理する場合、`past_len=3` なので位置は `[3]` になります。
