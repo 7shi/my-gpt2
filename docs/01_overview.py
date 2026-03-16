@@ -67,5 +67,3 @@ print(f"予測結果: '{text}' の次のトークン上位5件")
 for i, idx in enumerate(top_indices):
     token = tokenizer.decode([int(idx)])
     print(f"  {i+1}. '{token}' (確率: {probs[idx]:.4f})")
-
-print("\n--- 体験終了 ---")

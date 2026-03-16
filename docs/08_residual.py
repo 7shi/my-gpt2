@@ -14,7 +14,7 @@ if not os.path.exists(f"weights/{model_id}"):
     print("先に 'make download-gpt2' を実行して重みをダウンロードしてください。")
     sys.exit(1)
 
-print("--- 残差接続と Transformer Block 体験 ---")
+print("--- 残差接続と Transformer Block ---")
 print("重みをロード中...")
 params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
@@ -204,5 +204,3 @@ show_similarity(sent_vecs_ln, "LayerNorm あり")
 
 print(f"\n  [キーワード検索]")
 show_keyword_search(sent_vecs_ln, keywords, use_ln_f=True)
-
-print("\n--- 体験終了 ---")

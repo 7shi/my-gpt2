@@ -14,7 +14,7 @@ if not os.path.exists(f"weights/{model_id}"):
     print("先に 'make download-gpt2' を実行して重みをダウンロードしてください。")
     sys.exit(1)
 
-print("--- MLP（Multi-Layer Perceptron）体験 ---")
+print("--- MLP（Multi-Layer Perceptron） ---")
 print("重みをロード中...")
 params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
@@ -68,5 +68,3 @@ for i, tok in enumerate(tokens):
     v_out = x_mlp[0, i]
     sim = cosine_similarity(v_in, v_out)
     print(f"  {tok:>12}  {np.std(v_in):8.4f}  {np.std(v_out):8.4f}  {sim:14.4f}")
-
-print("\n--- 体験終了 ---")

@@ -22,7 +22,7 @@ if not os.path.exists(f"weights/{model_id}"):
     print("先に 'make download-gpt2' を実行して重みをダウンロードしてください。")
     sys.exit(1)
 
-print("--- Embedding（埋め込み）体験 ---")
+print("--- Embedding（埋め込み） ---")
 print("重みをロード中...")
 params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
@@ -83,5 +83,3 @@ print(f"  トークン: {tokens}")
 print(f"  WTE 形状: {wte[input_ids].shape}")
 print(f"  WPE 形状: {wpe[np.arange(len(input_ids))].shape}")
 print(f"  合成後の形状: {x.shape}")
-
-print("\n--- 体験終了 ---")

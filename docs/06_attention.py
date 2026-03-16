@@ -29,7 +29,7 @@ if not os.path.exists(f"weights/{model_id}"):
     print("先に 'make download-gpt2' を実行して重みをダウンロードしてください。")
     sys.exit(1)
 
-print("--- Attention 機構体験 ---")
+print("--- Attention 機構 ---")
 print("重みをロード中...")
 params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
@@ -81,5 +81,3 @@ for head in range(min(4, n_head)):
     top3 = np.argsort(p_head)[::-1][:3]
     items = ", ".join(f"{tokens[i]}({p_head[i]:.3f})" for i in top3)
     print(f"  Head {head}: {items}")
-
-print("\n--- 体験終了 ---")

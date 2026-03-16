@@ -11,7 +11,7 @@ if not os.path.exists(f"weights/{model_id}"):
     print("先に 'make download-gpt2' を実行して重みをダウンロードしてください。")
     sys.exit(1)
 
-print("--- Layer Normalization 体験 ---")
+print("--- Layer Normalization ---")
 print("重みをロード中...")
 params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
@@ -72,5 +72,3 @@ print("5. GPT-2 における LayerNorm の使用箇所")
 print(f"  各ブロック: ln_1（Attention 前）, ln_2（MLP 前）× 12ブロック = 24回")
 print(f"  最終出力:   ln_f（LM Head 前）× 1回")
 print(f"  合計: 25回の LayerNorm")
-
-print("\n--- 体験終了 ---")
