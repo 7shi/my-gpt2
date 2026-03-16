@@ -79,7 +79,7 @@ for block in blocks:
 # Step 3: 最終 LayerNorm — 出力前の正規化
 x = ln_f(x)
 
-# Step 4: LM Head — ベクトルを語彙サイズの確率分布に変換
+# Step 4: LM Head — ベクトルをロジット（確率分布の前段階）に変換
 logits = x @ wte.T
 
 # Step 5: サンプリング — 確率分布から次のトークンを選択
