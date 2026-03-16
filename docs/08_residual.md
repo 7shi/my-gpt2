@@ -10,9 +10,9 @@
    - トークナイザー
      - [BPE](02_tokenizer.md)
      - [SentencePiece](03_spiece.md)
-2. トークンID列
+2. トークン ID 列
    - [Embedding](04_embedding.md)
-3. ベクトル列 (seq_len, 768)
+3. ベクトル列
    - **Transformer Block × 12** ← この章
      - [LayerNorm](05_layer_norm.md)
      - [Attention](06_attention.md)
@@ -22,7 +22,7 @@
      - **残差接続** ← この章
    - **最終 LayerNorm** ← この章
    - [LM Head](09_output.md)
-4. ロジット (seq_len, 50257)
+4. ロジット
    - [サンプリング](09_output.md)
 5. 次のトークン
 
