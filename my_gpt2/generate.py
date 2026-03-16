@@ -30,16 +30,25 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p
     else:
         print(tokenizer.decode(input_ids), end="", flush=True)
 
-    # 3. 生成ループ
+    # 3. 生成ループ（KV キャッシュ使用）
     # マルチバイト文字の途中で切れた場合のバッファ
     byte_buffer = bytearray()
+    kv_cache = None  # 初回は None（prefill）
 
     for _ in range(n_tokens_to_generate):
-        # モデルの最大位置埋め込みを超えないようにする
-        inputs = np.array([input_ids[-1024:]])
+        if kv_cache is None:
+            # Prefill: 全プロンプトを処理してキャッシュを構築
+            inputs = np.array([input_ids[-1024:]])
+        else:
+            # Incremental: 新トークンのみ処理
+            inputs = np.array([[input_ids[-1]]])
 
-        # 順伝播
-        logits = model(inputs)
+        # 順伝播（KV キャッシュ付き）
+        logits, kv_cache = model(inputs, kv_cache=kv_cache)
+
+        # 1024 トークンを超えたらキャッシュを破棄して再構築
+        if kv_cache[0][0].shape[2] >= 1024:
+            kv_cache = None
 
         # 最後のトークンのロジットを取得
         next_token_logits = logits[0, -1, :]

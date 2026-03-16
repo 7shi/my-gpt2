@@ -1,4 +1,4 @@
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | **10**
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | [10](10_kv_cache.md) | **11**
 
 ---
 
@@ -134,8 +134,10 @@ GPT-2 のアーキテクチャは、現代の LLM の基本形です。GPT-4 や
 | 活性化関数 | GELU | SwiGLU |
 | Attention | 標準 MHA | GQA / MLA |
 
+Attention の行に注目すると、GQA（Grouped Query Attention）や MLA（Multi-head Latent Attention）は、KV キャッシュ（10 参照）のメモリ削減を主な動機としています。標準の MHA では全ヘッドが独立に K, V を持つため、層数やコンテキスト長の増大に伴いキャッシュが膨大になります。GQA は複数のヘッドで K, V を共有することで、推論時のメモリ使用量を抑えます。
+
 構造の違いは効率やスケーラビリティの改善であり、「残差ストリーム上で Attention と MLP を繰り返す」という根本的な設計は共通しています。GPT-2 の約400行の実装で理解した原理は、そのまま現代の LLM に通じます。
 
 ---
 
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | **10**
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | [10](10_kv_cache.md) | **11**

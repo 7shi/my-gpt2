@@ -1,6 +1,8 @@
 import numpy as np
 from dataclasses import dataclass
 
+_no_cache = object()
+
 @dataclass
 class LayerNormParams:
     g: np.ndarray
@@ -19,7 +21,7 @@ class AttentionParams:
     b_out: np.ndarray
     n_head: int = None
 
-    def __call__(self, x, n_head=None):
+    def __call__(self, x, n_head=None, kv_cache=_no_cache):
         n_head = n_head or self.n_head
         batch_size, seq_len, embed_dim = x.shape
         qkv = np.matmul(x, self.w_qkv) + self.b_qkv
@@ -31,6 +33,17 @@ class AttentionParams:
             return tensor.reshape(batch_size, seq_len, n_head, head_size).transpose(0, 2, 1, 3)
 
         q, k, v = map(split_heads, [q, k, v])
+
+        if kv_cache is not _no_cache:
+            if kv_cache is not None:
+                k = np.concatenate([kv_cache[0], k], axis=2)
+                v = np.concatenate([kv_cache[1], v], axis=2)
+            kv_len = k.shape[2]
+            mask = np.tril(np.ones((kv_len, kv_len)))[-seq_len:]
+            out = attention(q, k, v, mask=mask)
+            out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
+            return np.matmul(out, self.w_out) + self.b_out, (k, v)
+
         mask = np.tril(np.ones((seq_len, seq_len)))
         out = attention(q, k, v, mask=mask)
 
@@ -105,7 +118,12 @@ class TransformerBlock:
         self.ln_2 = params.ln_2
         self.mlp = params.mlp
 
-    def __call__(self, x):
+    def __call__(self, x, kv_cache=_no_cache):
+        if kv_cache is not _no_cache:
+            attn_out, new_kv_cache = self.attn(self.ln_1(x), kv_cache=kv_cache)
+            x = x + attn_out
+            x = x + self.mlp(self.ln_2(x))
+            return x, new_kv_cache
         # アテンション + 残差接続（Pre-LayerNorm）
         x = x + self.attn(self.ln_1(x))
         # MLP + 残差接続（Pre-LayerNorm）
@@ -121,11 +139,28 @@ class GPT2:
         self.ln_f = params.ln_f
         self.blocks = [TransformerBlock(p, n_head) for p in params.blocks]
 
-    def __call__(self, input_ids):
+    def __call__(self, input_ids, kv_cache=_no_cache):
         # input_ids: (batch_size, seq_len)
+        seq_len = input_ids.shape[1]
+
+        # 位置埋め込みのオフセット（KV キャッシュ使用時）
+        if kv_cache is not _no_cache and kv_cache is not None:
+            past_len = kv_cache[0][0].shape[2]
+        else:
+            past_len = 0
+        positions = np.arange(past_len, past_len + seq_len)
+
         # トークン埋め込み + 位置埋め込み
-        # wte: (vocab_size, embed_dim), wpe: (max_pos, embed_dim)
-        x = self.params.wte[input_ids] + self.params.wpe[np.arange(input_ids.shape[1])]
+        x = self.params.wte[input_ids] + self.params.wpe[positions]
+
+        if kv_cache is not _no_cache:
+            new_kv_cache = []
+            for i, block in enumerate(self.blocks):
+                layer_cache = kv_cache[i] if kv_cache is not None else None
+                x, layer_cache = block(x, kv_cache=layer_cache)
+                new_kv_cache.append(layer_cache)
+            x = self.ln_f(x)
+            return np.matmul(x, self.params.wte.T), new_kv_cache
 
         # トランスフォーマーブロック
         for block in self.blocks:
@@ -135,7 +170,6 @@ class GPT2:
         x = self.ln_f(x)
 
         # 言語モデルヘッド（重み共有）
-        # 語彙サイズに射影: (batch_size, seq_len, vocab_size)
         return np.matmul(x, self.params.wte.T)
 
 def main():

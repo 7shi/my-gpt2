@@ -30,7 +30,8 @@
 | [07_mlp](docs/07_mlp.md) | MLP — トークンの特徴変換 | [実験](docs/07_mlp.py) |
 | [08_residual](docs/08_residual.md) | 残差接続と Transformer Block | [実験](docs/08_residual.py) |
 | [09_output](docs/09_output.md) | 出力 — LM Head、Weight Tying、サンプリング | [実験](docs/09_output.py) |
-| [10_architecture](docs/10_architecture.md) | アーキテクチャ — GPT-2 の設計思想 | |
+| [10_kv_cache](docs/10_kv_cache.md) | KV キャッシュ — 自己回帰生成の高速化 | [実験](docs/10_kv_cache.py) |
+| [11_architecture](docs/11_architecture.md) | アーキテクチャ — GPT-2 の設計思想 | |
 
 ## 🔍 GPT-2 の位置づけ
 

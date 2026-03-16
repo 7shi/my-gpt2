@@ -1,4 +1,4 @@
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | **9** | [10](10_architecture.md)
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | **9** | [10](10_kv_cache.md) | [11](11_architecture.md)
 
 ---
 
@@ -85,6 +85,15 @@ Top-k と Top-p は組み合わせることができ、その場合は Top-k で
 
 GPT-2 は一度に1トークンずつ予測します。予測したトークンを入力に追加して再び推論するループ（自己回帰）を繰り返すことで文章を生成します。
 
+```python
+for _ in range(n_tokens_to_generate):
+    logits = model(np.array([input_ids]))
+    next_token = int(np.argmax(logits[0, -1, :]))
+    input_ids.append(next_token)
+```
+
+毎回入力全体をモデルに通し、最後のトークンの確率分布から次のトークンを選びます。この例は greedy（最も確率が高いトークンを選択）ですが、Temperature や Top-k/Top-p を組み合わせたサンプリングも可能です。
+
 ```
 Step 1: 'Artificial Intelligence will' → 候補: ' be'(0.184), ' become'(0.036)...
   → 選択: ' be'
@@ -95,6 +104,8 @@ Step 3: 'Artificial Intelligence will be able' → 候補: ' to'(0.991)
 ```
 
 Step 3 では「be able」の後に「to」が来る確率が99%を超えています。文法的なパターンが確定すると、モデルの「迷い」は消え、決定的な振る舞いになります。
+
+なお、この素朴な実装では毎回全トークンを再計算しています。KV キャッシュ（10 参照）を使えば、新しいトークンの計算だけで済むようになります。
 
 ## コマンドライン引数
 
@@ -116,4 +127,4 @@ uv run docs/09_output.py
 
 ---
 
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | **9** | [10](10_architecture.md)
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | **9** | [10](10_kv_cache.md) | [11](11_architecture.md)
