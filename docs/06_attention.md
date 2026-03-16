@@ -88,14 +88,15 @@ out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
 return np.matmul(out, params.w_out) + params.b_out
 ```
 
-## 体験してみよう
+## 実験：注目パターンの可視化
 
-### 実行方法
+「The quick brown fox jumps over the lazy dog.」を入力し、因果マスキングの動作確認、注目先の分布、複数ヘッド間の注目パターンの違いを観察します。実行結果は本文中で引用しています。
+
+**実行方法**: ([06_attention.py](06_attention.py))
+
 ```bash
 uv run docs/06_attention.py
 ```
-
-「The quick brown fox jumps over the lazy dog.」を入力し、因果マスキングの動作確認、注目先の分布、複数ヘッド間の注目パターンの違いを観察できます。
 
 ---
 

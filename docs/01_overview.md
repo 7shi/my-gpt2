@@ -70,16 +70,17 @@ def __call__(self, input_ids):
 
 わずか数行のコードですが、この中に Embedding、Attention、MLP、LayerNorm、残差接続、Weight Tying といった要素が凝縮されています。以降のドキュメントで、各ステップの仕組みを順番に解説していきます。
 
-## 体験してみよう
+## 実験：ステップごとに観察
 
-### 実行方法
+入力テキストが Embedding → Transformer Block × 12 → LayerNorm → LM Head の各ステップをどのように通過するかを、形状・平均・標準偏差で追跡します。
+
+**実行方法**: ([01_overview.py](01_overview.py))
+
 ```bash
 uv run docs/01_overview.py
 ```
 
-### 実行結果（例）
-
-入力テキスト `The capital of France is` を処理する様子を、ステップごとに追跡します。
+実行すると、入力テキスト `The capital of France is` を処理する様子を、ステップごとに追跡します。
 
 **Step 1: Embedding**
 
