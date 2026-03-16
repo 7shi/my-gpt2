@@ -27,7 +27,6 @@ tokens = [tokenizer.decode([i]) for i in input_ids]
 
 # Embedding → LayerNorm → Attention → 残差接続 → LayerNorm（MLP の入力を準備）
 x = params.wte[input_ids] + params.wpe[np.arange(len(input_ids))]
-x = x[np.newaxis, ...]
 block = params.blocks[0]
 x_after_attn = x + block.attn(block.ln_1(x), n_head=n_head)
 x_ln2 = block.ln_2(x_after_attn)
@@ -64,7 +63,7 @@ print("3. MLP 前後のベクトル変化")
 x_mlp = block.mlp(x_ln2)
 print(f"  {'トークン':>12}  {'入力std':>8}  {'出力std':>8}  {'コサイン類似度':>14}")
 for i, tok in enumerate(tokens):
-    v_in = x_ln2[0, i]
-    v_out = x_mlp[0, i]
+    v_in = x_ln2[i]
+    v_out = x_mlp[i]
     sim = cosine_similarity(v_in, v_out)
     print(f"  {tok:>12}  {np.std(v_in):8.4f}  {np.std(v_out):8.4f}  {sim:14.4f}")

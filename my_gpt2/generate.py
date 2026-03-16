@@ -38,10 +38,10 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p
     for _ in range(n_tokens_to_generate):
         if kv_cache is None:
             # Prefill: 全プロンプトを処理してキャッシュを構築
-            inputs = np.array([input_ids[-1024:]])
+            inputs = np.array(input_ids[-1024:])
         else:
             # Incremental: 新トークンのみ処理
-            inputs = np.array([[input_ids[-1]]])
+            inputs = np.array([input_ids[-1]])
 
         # 順伝播（KV キャッシュ付き）
         logits, kv_cache = model(inputs, kv_cache=kv_cache)
@@ -51,7 +51,7 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p
             kv_cache = None
 
         # 最後のトークンのロジットを取得
-        next_token_logits = logits[0, -1, :]
+        next_token_logits = logits[-1, :]
 
         # 温度を適用
         if temperature > 0:

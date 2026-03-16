@@ -24,8 +24,8 @@ def test_transformer_block_shape():
     )
 
     block = TransformerBlock(params, n_head)
-    x = np.random.randn(batch_size, seq_len, embed_dim)
+    x = np.random.randn(seq_len, embed_dim)
 
     out = block(x)
 
-    assert out.shape == (batch_size, seq_len, embed_dim)
+    assert out.shape == (seq_len, embed_dim)

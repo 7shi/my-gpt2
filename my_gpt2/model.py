@@ -23,31 +23,31 @@ class AttentionParams:
 
     def __call__(self, x, n_head=None, kv_cache=_no_cache):
         n_head = n_head or self.n_head
-        batch_size, seq_len, embed_dim = x.shape
+        seq_len, embed_dim = x.shape
         qkv = np.matmul(x, self.w_qkv) + self.b_qkv
 
         q, k, v = np.split(qkv, 3, axis=-1)
         head_size = embed_dim // n_head
 
         def split_heads(tensor):
-            return tensor.reshape(batch_size, seq_len, n_head, head_size).transpose(0, 2, 1, 3)
+            return tensor.reshape(seq_len, n_head, head_size).transpose(1, 0, 2)
 
         q, k, v = map(split_heads, [q, k, v])
 
         if kv_cache is not _no_cache:
             if kv_cache is not None:
-                k = np.concatenate([kv_cache[0], k], axis=2)
-                v = np.concatenate([kv_cache[1], v], axis=2)
-            kv_len = k.shape[2]
+                k = np.concatenate([kv_cache[0], k], axis=1)
+                v = np.concatenate([kv_cache[1], v], axis=1)
+            kv_len = k.shape[1]
             mask = np.tril(np.ones((kv_len, kv_len)))[-seq_len:]
             out = attention(q, k, v, mask=mask)
-            out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
+            out = out.transpose(1, 0, 2).reshape(seq_len, embed_dim)
             return np.matmul(out, self.w_out) + self.b_out, (k, v)
 
         mask = np.tril(np.ones((seq_len, seq_len)))
         out = attention(q, k, v, mask=mask)
 
-        out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
+        out = out.transpose(1, 0, 2).reshape(seq_len, embed_dim)
         return np.matmul(out, self.w_out) + self.b_out
 
 @dataclass
@@ -99,7 +99,7 @@ def attention(q, k, v, mask=None):
     mask: 因果マスク (seq_len, seq_len)
     """
     d_k = q.shape[-1]
-    scores = np.matmul(q, k.transpose(0, 1, 3, 2)) / np.sqrt(d_k)
+    scores = np.matmul(q, k.transpose(0, 2, 1)) / np.sqrt(d_k)
 
     if mask is not None:
         scores = np.where(mask == 0, -1e10, scores)
@@ -140,12 +140,12 @@ class GPT2:
         self.blocks = [TransformerBlock(p, n_head) for p in params.blocks]
 
     def __call__(self, input_ids, kv_cache=_no_cache):
-        # input_ids: (batch_size, seq_len)
-        seq_len = input_ids.shape[1]
+        # input_ids: (seq_len,)
+        seq_len = len(input_ids)
 
         # 位置埋め込みのオフセット（KV キャッシュ使用時）
         if kv_cache is not _no_cache and kv_cache is not None:
-            past_len = kv_cache[0][0].shape[2]
+            past_len = kv_cache[0][0].shape[1]
         else:
             past_len = 0
         positions = np.arange(past_len, past_len + seq_len)

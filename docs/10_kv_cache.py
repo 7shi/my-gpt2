@@ -29,8 +29,8 @@ ids_no_cache = input_ids.copy()
 
 start = time.time()
 for step in range(n_steps):
-    logits = model(np.array([ids_no_cache]))
-    next_token = int(np.argmax(logits[0, -1, :]))
+    logits = model(np.array(ids_no_cache))
+    next_token = int(np.argmax(logits[-1, :]))
     ids_no_cache.append(next_token)
 elapsed_no_cache = time.time() - start
 
@@ -45,16 +45,16 @@ ids_cached = input_ids.copy()
 
 start = time.time()
 # Prefill
-inputs = np.array([input_ids])
+inputs = np.array(input_ids)
 logits, kv_cache = model(inputs, kv_cache=None)
-next_token = int(np.argmax(logits[0, -1, :]))
+next_token = int(np.argmax(logits[-1, :]))
 ids_cached.append(next_token)
 
 # Incremental
 for step in range(n_steps - 1):
-    inputs = np.array([[ids_cached[-1]]])
+    inputs = np.array([ids_cached[-1]])
     logits, kv_cache = model(inputs, kv_cache=kv_cache)
-    next_token = int(np.argmax(logits[0, -1, :]))
+    next_token = int(np.argmax(logits[-1, :]))
     ids_cached.append(next_token)
 elapsed_cached = time.time() - start
 

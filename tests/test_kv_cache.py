@@ -34,19 +34,19 @@ def make_model(vocab_size=100, embed_dim=16, n_head=2, n_layer=2, max_pos=128):
 def test_kv_cache_equivalence():
     """キャッシュあり/なしで最終トークンの logits が一致する。"""
     model = make_model()
-    input_ids = np.array([[10, 20, 30, 40, 50]])
+    input_ids = np.array([10, 20, 30, 40, 50])
 
     # キャッシュなし
     logits_no_cache = model(input_ids)
 
     # Prefill + 1 step incremental
-    prefill_ids = np.array([[10, 20, 30, 40]])
+    prefill_ids = np.array([10, 20, 30, 40])
     _, kv_cache = model(prefill_ids, kv_cache=None)
-    last_id = np.array([[50]])
+    last_id = np.array([50])
     logits_cached, _ = model(last_id, kv_cache=kv_cache)
 
     np.testing.assert_allclose(
-        logits_cached[0, 0, :], logits_no_cache[0, -1, :], atol=1e-5
+        logits_cached[0, :], logits_no_cache[-1, :], atol=1e-5
     )
 
 
@@ -59,17 +59,15 @@ def test_kv_cache_multistep():
     # キャッシュなし
     ids_no_cache = prompt.copy()
     for _ in range(n_steps):
-        logits = model(np.array([ids_no_cache]))
-        ids_no_cache.append(int(np.argmax(logits[0, -1, :])))
+        logits = model(np.array(ids_no_cache))
+        ids_no_cache.append(int(np.argmax(logits[-1, :])))
 
     # キャッシュあり
     ids_cached = prompt.copy()
-    inputs = np.array([prompt])
-    logits, kv_cache = model(inputs, kv_cache=None)
-    ids_cached.append(int(np.argmax(logits[0, -1, :])))
+    logits, kv_cache = model(np.array(prompt), kv_cache=None)
+    ids_cached.append(int(np.argmax(logits[-1, :])))
     for _ in range(n_steps - 1):
-        inputs = np.array([[ids_cached[-1]]])
-        logits, kv_cache = model(inputs, kv_cache=kv_cache)
-        ids_cached.append(int(np.argmax(logits[0, -1, :])))
+        logits, kv_cache = model(np.array([ids_cached[-1]]), kv_cache=kv_cache)
+        ids_cached.append(int(np.argmax(logits[-1, :])))
 
     assert ids_no_cache == ids_cached

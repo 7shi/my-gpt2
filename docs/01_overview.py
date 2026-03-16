@@ -30,8 +30,7 @@ print(f"トークンID: {input_ids}")
 print("\n" + "=" * 50)
 print("Step 1: Embedding (トークン埋め込み + 位置埋め込み)")
 x = params.wte[input_ids] + params.wpe[np.arange(len(input_ids))]
-x = x[np.newaxis, ...]  # (1, seq_len, 768)
-print(f"  形状: {x.shape}  (バッチ, トークン数, 埋め込み次元)")
+print(f"  形状: {x.shape}  (トークン数, 埋め込み次元)")
 print(f"  平均: {np.mean(x):.4f}, 標準偏差: {np.std(x):.4f}")
 
 # ステップ 2: Transformer Block × 12
@@ -55,10 +54,10 @@ print(f"  平均: {np.mean(x):.4f}, 標準偏差: {np.std(x):.4f}")
 print("\n" + "=" * 50)
 print("Step 4: LM Head (Weight Tying: x @ wte.T)")
 logits = np.matmul(x, params.wte.T)
-print(f"  形状: {logits.shape}  (バッチ, トークン数, 語彙数)")
+print(f"  形状: {logits.shape}  (トークン数, 語彙数)")
 
 # 最後のトークンの予測結果
-next_token_logits = logits[0, -1, :]
+next_token_logits = logits[-1, :]
 probs = softmax(next_token_logits)
 top_indices = np.argsort(probs)[::-1][:5]
 

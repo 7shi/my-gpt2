@@ -1,3 +1,2 @@
 from importlib.metadata import version
-__name__ = "my-gpt2"
-__version__ = version(__name__)
+__version__ = version("my-gpt2")

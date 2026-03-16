@@ -12,7 +12,7 @@ GPT-2 の推論は、わずか数行のコードに集約されます。
 
 ```python
 def __call__(self, input_ids):
-    x = self.params.wte[input_ids] + self.params.wpe[np.arange(input_ids.shape[1])]
+    x = self.params.wte[input_ids] + self.params.wpe[np.arange(len(input_ids))]
     for block in self.blocks:
         x = block(x)
     x = self.ln_f(x)

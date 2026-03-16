@@ -36,8 +36,8 @@ def test_gpt2_full_shape():
     model = GPT2(params, n_head)
 
     # 入力トークンID（整数）
-    input_ids = np.random.randint(0, vocab_size, (batch_size, seq_len))
+    input_ids = np.random.randint(0, vocab_size, seq_len)
 
     logits = model(input_ids)
 
-    assert logits.shape == (batch_size, seq_len, vocab_size)
+    assert logits.shape == (seq_len, vocab_size)

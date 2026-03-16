@@ -42,14 +42,14 @@ Step 3: [A, B, C, D, E] → 全5トークンを計算 → 次のトークン F
 
 ```python
 # Prefill: 全プロンプトを処理してキャッシュを構築
-logits, kv_cache = model(np.array([input_ids]), kv_cache=None)
-next_token = int(np.argmax(logits[0, -1, :]))
+logits, kv_cache = model(np.array(input_ids), kv_cache=None)
+next_token = int(np.argmax(logits[-1, :]))
 input_ids.append(next_token)
 
 # Incremental: 新トークンのみ処理
 for _ in range(n_tokens_to_generate - 1):
-    logits, kv_cache = model(np.array([[input_ids[-1]]]), kv_cache=kv_cache)
-    next_token = int(np.argmax(logits[0, -1, :]))
+    logits, kv_cache = model(np.array([input_ids[-1]]), kv_cache=kv_cache)
+    next_token = int(np.argmax(logits[-1, :]))
     input_ids.append(next_token)
 ```
 

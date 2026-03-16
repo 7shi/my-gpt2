@@ -31,8 +31,8 @@ print(f"\nプロンプト: '{prompt}'")
 # 1. Temperature による確率分布の変化
 print("\n" + "=" * 50)
 print("1. Temperature による確率分布の変化")
-logits = model(np.array([input_ids]))
-next_logits = logits[0, -1, :]
+logits = model(np.array(input_ids))
+next_logits = logits[-1, :]
 
 for temp in [0.5, 1.0, 2.0]:
     scaled = next_logits / temp
@@ -48,8 +48,8 @@ print("2. 自己回帰生成（Greedy、3ステップ）")
 current_ids = input_ids.copy()
 
 for step in range(3):
-    logits = model(np.array([current_ids]))
-    next_logits = logits[0, -1, :]
+    logits = model(np.array(current_ids))
+    next_logits = logits[-1, :]
 
     top = get_top_tokens(next_logits, tokenizer)
     print(f"\n  Step {step + 1}: 次のトークン候補")
