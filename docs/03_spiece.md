@@ -52,7 +52,7 @@ log P(▁, 日本語) = log P(▁) + log P(日本語)
 
 ### BPE との比較
 
-| 観点 | BPE（`openai-community/gpt2`） | Unigram（`rinna/japanese-gpt2-small`） |
+| 観点 | BPE | Unigram |
 |---|---|---|
 | アルゴリズム | 最頻ペアを繰り返し結合 | 各ピースに対数確率スコアを持つ言語モデル |
 | 分割方法 | 決定的（マージ順に従う） | 最尤分割（Viterbi で最高スコアを探す） |
@@ -344,7 +344,6 @@ best[4] = (-13.4308,  1, "日本語")
 末尾の `best[4]` から開始インデックスを逆に辿る（バックトラック）と、最適なピース列が得られます。
 
 - `best[4]` → `best[1]` → `best[0]`: `["▁", "日本語"]`
-
 
 ```python
 def _normalize(self, text):
