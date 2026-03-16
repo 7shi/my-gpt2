@@ -1,3 +1,7 @@
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | **3** | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md)
+
+---
+
 # SentencePiece トークナイザー（Unigramモデル）解説
 
 `rinna/japanese-gpt2-small` は BPE ではなく SentencePiece の**Unigramモデル**を使用します。`my_gpt2/spiece.py` では、外部ライブラリなしに `spiece.model` を直接読み込んでエンコード・デコードを行います。
@@ -430,3 +434,7 @@ uv run model2vocab weights/rinna/japanese-gpt2-small/spiece.model -o vocab.txt
 ▁	-3.523782
 の	-3.658956
 ```
+
+---
+
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | **3** | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md)

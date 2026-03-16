@@ -1,10 +1,12 @@
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | **6** | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md)
+
+---
+
 # Attention: 文脈の理解
 
 Attention は GPT-2 が「文脈」を理解するための最も重要なコンポーネントです。各トークンが他のトークンとの関係性を計算し、文脈を取り込んだベクトルへと自身を更新します。
 
 LayerNorm（05 参照）を適用した後のベクトルに対して、この処理が行われます。
-
----
 
 ## 1. Q, K, V（Query, Key, Value）
 
@@ -26,8 +28,6 @@ def mha(x, params, n_head):
 
 もし入力ベクトル同士で直接類似度を計算すると、「検索する側の顔」と「検索される側の顔」を区別できません。異なる投影行列を用意することで、同じ単語でも「文脈を探しに行く時の表現」と「文脈のヒントを与える時の表現」を使い分けられるようになります。
 
----
-
 ## 2. スコア計算とスケーリング
 
 Q と K の内積を取り、類似度（スコア）を計算します。次元数 $\sqrt{d_k}$ で割ることでスケーリングします。
@@ -39,8 +39,6 @@ scores = np.matmul(q, k.transpose(0, 1, 3, 2)) / np.sqrt(d_k)
 ### 設計の動機: なぜ $\sqrt{d_k}$ でスケーリングするのか？
 
 次元数が大きいと内積の値が非常に大きくなり、Softmax の出力が「ほぼ1箇所だけ1で他は0」という極端な分布になります。$\sqrt{d_k}$ で割ることで値を適正な範囲に保ち、学習を安定させます。
-
----
 
 ## 3. 因果マスキング（Causal Masking）
 
@@ -69,8 +67,6 @@ tok3  [  s     s     s     s   ]
     -> The        : 1.0000
 ```
 
----
-
 ## 4. Multi-Head の統合
 
 12個のヘッドが並列に異なる「注目パターン」を学習します。
@@ -92,8 +88,6 @@ out = out.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, embed_dim)
 return np.matmul(out, params.w_out) + params.b_out
 ```
 
----
-
 ## 体験してみよう
 
 ### 実行方法
@@ -102,3 +96,7 @@ uv run docs/06_attention.py
 ```
 
 「The quick brown fox jumps over the lazy dog.」を入力し、因果マスキングの動作確認、注目先の分布、複数ヘッド間の注目パターンの違いを観察できます。
+
+---
+
+ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | **6** | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md)
