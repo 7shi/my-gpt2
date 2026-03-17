@@ -45,22 +45,22 @@ print(f"|---|---|---|")
 print(f"|入力 | {np.std(x_input[pos]):.4f} | |")
 
 x_ln1 = block.ln_1(x_input)
-print(f"|LayerNorm 1 後 | {np.std(x_ln1[pos]):.4f} | |")
+print(f"|LayerNorm | {np.std(x_ln1[pos]):.4f} | |")
 
 x_attn = block.attn(x_ln1, n_head=n_head)
-print(f"|Attention 出力 | {np.std(x_attn[pos]):.4f} | |")
+print(f"|Attention | {np.std(x_attn[pos]):.4f} | |")
 
 x_res1 = x_input + x_attn
-print(f"|残差接続 1 後 | {np.std(x_res1[pos]):.4f} | 入力 + Attention |")
+print(f"|残差接続 | {np.std(x_res1[pos]):.4f} | 残差1 = 入力 + Attention |")
 
 x_ln2 = block.ln_2(x_res1)
-print(f"|LayerNorm 2 後 | {np.std(x_ln2[pos]):.4f} | |")
+print(f"|LayerNorm | {np.std(x_ln2[pos]):.4f} | |")
 
 x_mlp = block.mlp(x_ln2)
-print(f"|MLP 出力 | {np.std(x_mlp[pos]):.4f} | |")
+print(f"|MLP | {np.std(x_mlp[pos]):.4f} | |")
 
 x_res2 = x_res1 + x_mlp
-print(f"|残差接続 2 後 | {np.std(x_res2[pos]):.4f} | 残差1 + MLP |")
+print(f"|残差接続 | {np.std(x_res2[pos]):.4f} | 残差1 + MLP |")
 
 # 2. 12ブロック全体の変化
 print("\n" + "=" * 50)
@@ -68,10 +68,10 @@ print("2. 12ブロックを通した表現の変化")
 x_layer = x.copy()
 print(f"  (最後のトークン '{tokens[-1].strip()}' の768次元ベクトルで観察)")
 print()
-print(f"|層 | 標準偏差 | Emb からの cos 類似度 |")
+print(f"|層 | 標準偏差 | Embedding からのコサイン類似度 |")
 print(f"|---|---|---|")
 emb_vec = x[-1].copy()  # 最後のトークンの Embedding ベクトル
-print(f"|Emb | {np.std(x_layer[-1]):.4f} | {1.0:.4f} |")
+print(f"|Embedding | {np.std(x_layer[-1]):.4f} | {1.0:.4f} |")
 for i, block_params in enumerate(params.blocks):
     block_obj = TransformerBlock(block_params, n_head)
     x_layer = block_obj(x_layer)
@@ -110,12 +110,12 @@ print(f"  文A: '{texts[0]}'")
 print(f"  文B: '{texts[1]}'")
 print(f"  比較対象: '{target_word}' のベクトル")
 print()
-print(f"|層 | 文A-文B cos 類似度 |")
+print(f"|層 | 文A-文B コサイン類似度 |")
 print(f"|---|---|")
 for layer_idx in range(14):
     sim = cosine_similarity(vecs_by_layer[0][layer_idx], vecs_by_layer[1][layer_idx])
     if layer_idx == 0:
-        label = "Emb"
+        label = "Embedding"
     elif layer_idx == 13:
         label = "ln_f"
     else:
