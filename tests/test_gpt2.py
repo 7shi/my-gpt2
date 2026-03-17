@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from my_gpt2.model import gelu, softmax, LayerNormParams
+from my_gpt2.model import gelu, softmax, LayerNorm
 
 def test_gelu():
     # GELU(x) ≈ 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))
@@ -24,7 +24,7 @@ def test_softmax():
 def test_layer_norm():
     x = np.random.randn(10, 768) # 768はGPT-2の埋め込みサイズ
     # GPT-2では g（ガンマ）と b（ベータ）がパラメータ
-    params = LayerNormParams(g=np.ones(768), b=np.zeros(768))
+    params = LayerNorm(g=np.ones(768), b=np.zeros(768))
 
     out = params(x)
 

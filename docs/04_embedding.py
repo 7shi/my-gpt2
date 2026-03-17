@@ -24,10 +24,10 @@ if not os.path.exists(f"weights/{model_id}"):
 
 print("--- Embedding（埋め込み） ---")
 print("重みをロード中...")
-params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
-wte = params.wte  # (50257, 768)
-wpe = params.wpe  # (1024, 768)
+model = load_gpt2_weights(model_id)
+wte = model.wte  # (50257, 768)
+wpe = model.wpe  # (1024, 768)
 
 def get_vec(text):
     ids = tokenizer.encode(text)

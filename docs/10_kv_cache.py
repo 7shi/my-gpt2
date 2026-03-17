@@ -2,7 +2,6 @@ import numpy as np
 import time
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import GPT2
 import os
 import sys
 
@@ -14,9 +13,8 @@ if not os.path.exists(f"weights/{model_id}"):
 
 print("--- KV キャッシュ ---")
 print("重みをロード中...")
-params = load_gpt2_weights(model_id)
+model = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
-model = GPT2(params, n_head=12)
 
 prompt = "Artificial Intelligence will"
 input_ids = tokenizer.encode(prompt)

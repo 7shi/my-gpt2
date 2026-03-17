@@ -1,7 +1,6 @@
 import numpy as np
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import TransformerBlock
 import os
 import sys
 
@@ -16,9 +15,8 @@ if not os.path.exists(f"weights/{model_id}"):
 
 print("--- 残差接続と Transformer Block ---")
 print("重みをロード中...")
-params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
-n_head = 12
+model = load_gpt2_weights(model_id)
 
 # 入力テキスト
 text = "Machine Learning"
@@ -26,14 +24,14 @@ input_ids = tokenizer.encode(text)
 tokens = [tokenizer.decode([i]) for i in input_ids]
 
 # Embedding
-x = params.wte[input_ids] + params.wpe[np.arange(len(input_ids))]
+x = model.wte[input_ids] + model.wpe[np.arange(len(input_ids))]
 
 print(f"\n入力: '{text}' (トークン数: {len(tokens)})")
 
 # 1. 1ブロック内の処理ステップ
 print("\n" + "=" * 50)
 print("1. Block 0 の内部処理ステップ")
-block = params.blocks[0]
+block = model.blocks[0]
 
 x_input = x.copy()
 pos = -1  # 最後のトークンのベクトルで観察
@@ -47,7 +45,7 @@ print(f"|入力 | {np.std(x_input[pos]):.4f} | |")
 x_ln1 = block.ln_1(x_input)
 print(f"|LayerNorm | {np.std(x_ln1[pos]):.4f} | |")
 
-x_attn = block.attn(x_ln1, n_head=n_head)
+x_attn = block.attn(x_ln1)
 print(f"|Attention | {np.std(x_attn[pos]):.4f} | |")
 
 x_res1 = x_input + x_attn
@@ -72,12 +70,11 @@ print(f"|層 | 標準偏差 | Embedding からのコサイン類似度 |")
 print(f"|---|---|---|")
 emb_vec = x[-1].copy()  # 最後のトークンの Embedding ベクトル
 print(f"|Embedding | {np.std(x_layer[-1]):.4f} | {1.0:.4f} |")
-for i, block_params in enumerate(params.blocks):
-    block_obj = TransformerBlock(block_params, n_head)
-    x_layer = block_obj(x_layer)
+for i, block in enumerate(model.blocks):
+    x_layer = block(x_layer)
     sim = cosine_similarity(emb_vec, x_layer[-1])
     print(f"|{i} | {np.std(x_layer[-1]):.4f} | {sim:.4f} |")
-x_ln_f = params.ln_f(x_layer)
+x_ln_f = model.ln_f(x_layer)
 sim = cosine_similarity(emb_vec, x_ln_f[-1])
 print(f"|ln_f | {np.std(x_ln_f[-1]):.4f} | {sim:.4f} |")
 
@@ -95,14 +92,13 @@ vecs_by_layer = []
 for t in texts:
     ids = tokenizer.encode(t)
     bank_pos = ids.index(target_id)
-    xi = params.wte[ids] + params.wpe[np.arange(len(ids))]
+    xi = model.wte[ids] + model.wpe[np.arange(len(ids))]
 
     layer_vecs = [xi[bank_pos].copy()]
-    for bp in params.blocks:
-        blk = TransformerBlock(bp, n_head)
-        xi = blk(xi)
+    for block in model.blocks:
+        xi = block(xi)
         layer_vecs.append(xi[bank_pos].copy())
-    xi_ln = params.ln_f(xi)
+    xi_ln = model.ln_f(xi)
     layer_vecs.append(xi_ln[bank_pos].copy())
     vecs_by_layer.append(layer_vecs)
 
@@ -141,12 +137,11 @@ sentences = [
 
 def get_sentence_vector(text, use_ln_f=False):
     ids = tokenizer.encode(text)
-    xi = params.wte[ids] + params.wpe[np.arange(len(ids))]
-    for bp in params.blocks:
-        blk = TransformerBlock(bp, n_head)
-        xi = blk(xi)
+    xi = model.wte[ids] + model.wpe[np.arange(len(ids))]
+    for block in model.blocks:
+        xi = block(xi)
     if use_ln_f:
-        xi = params.ln_f(xi)
+        xi = model.ln_f(xi)
     return xi[-1].copy()
 
 def show_ranking(results):

@@ -1,12 +1,12 @@
 import numpy as np
 import pytest
-from my_gpt2.model import MLPParams
+from my_gpt2.model import MLP
 
 def test_mlp_shape():
     batch_size, seq_len, embed_dim = 1, 10, 768
     x = np.random.randn(batch_size, seq_len, embed_dim)
 
-    params = MLPParams(
+    params = MLP(
         w_fc=np.random.randn(embed_dim, 4 * embed_dim),
         b_fc=np.zeros(4 * embed_dim),
         w_proj=np.random.randn(4 * embed_dim, embed_dim),
@@ -23,7 +23,7 @@ def test_mlp_independence():
     batch_size, seq_len, embed_dim = 1, 2, 8
     x1 = np.random.randn(batch_size, seq_len, embed_dim)
 
-    params = MLPParams(
+    params = MLP(
         w_fc=np.random.randn(embed_dim, 4 * embed_dim),
         b_fc=np.zeros(4 * embed_dim),
         w_proj=np.random.randn(4 * embed_dim, embed_dim),

@@ -1,7 +1,6 @@
 import numpy as np
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import LayerNormParams
 import os
 import sys
 
@@ -13,8 +12,8 @@ if not os.path.exists(f"weights/{model_id}"):
 
 print("--- Layer Normalization ---")
 print("重みをロード中...")
-params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
+model = load_gpt2_weights(model_id)
 
 # 入力テキスト
 text = "The capital of France is"
@@ -22,7 +21,7 @@ input_ids = tokenizer.encode(text)
 tokens = [tokenizer.decode([i]) for i in input_ids]
 
 # Embedding
-x = params.wte[input_ids] + params.wpe[np.arange(len(input_ids))]
+x = model.wte[input_ids] + model.wpe[np.arange(len(input_ids))]
 x = x[np.newaxis, ...]  # (1, seq_len, 768)
 
 print(f"\n入力: '{text}'")
@@ -31,7 +30,7 @@ print(f"トークン数: {len(tokens)}")
 # 1. LayerNorm 適用前後の統計（統合テーブル）
 print("\n" + "=" * 50)
 print("1. LayerNorm 適用前後（Embedding 直後 vs γ/β 適用後）")
-ln_1 = params.blocks[0].ln_1
+ln_1 = model.blocks[0].ln_1
 x_ln = ln_1(x)
 print(f"|   トークン   | 平均(前) | 分散(前) | 平均(後) | 分散(後) |")
 print(f"|--------------|---------:|---------:|---------:|---------:|")

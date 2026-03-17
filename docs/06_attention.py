@@ -31,9 +31,9 @@ if not os.path.exists(f"weights/{model_id}"):
 
 print("--- Attention 機構 ---")
 print("重みをロード中...")
-params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
-n_head = 12
+model = load_gpt2_weights(model_id)
+n_head = model.config["n_head"]
 
 # 入力テキスト
 text = "The quick brown fox jumps over the lazy dog."
@@ -41,13 +41,13 @@ input_ids = tokenizer.encode(text)
 tokens = [tokenizer.decode([i]) for i in input_ids]
 
 # Embedding + LayerNorm
-x = params.wte[input_ids] + params.wpe[np.arange(len(input_ids))]
+x = model.wte[input_ids] + model.wpe[np.arange(len(input_ids))]
 x = x[np.newaxis, ...]
-x_norm = params.blocks[0].ln_1(x)
+x_norm = model.blocks[0].ln_1(x)
 
 # Attention スコアを計算
-attn_params = params.blocks[0].attn
-probs = mha_scores(x_norm, attn_params.w_qkv, attn_params.b_qkv, n_head)
+attn = model.blocks[0].attn
+probs = mha_scores(x_norm, attn.w_qkv, attn.b_qkv, n_head)
 
 print(f"\n入力: '{text}'")
 print(f"トークン: {tokens}")

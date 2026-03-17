@@ -3,7 +3,6 @@ import numpy as np
 import argparse
 from .tokenizer import Tokenizer
 from .spiece import SentencePieceTokenizer
-from .model import GPT2
 from .loader import load_gpt2_weights
 from .model import softmax
 
@@ -16,9 +15,7 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p
         else:
             tokenizer = Tokenizer(model_id)
     if model is None:
-        params = load_gpt2_weights(model_id, verbose=verbose)
-        # GPT-2（124M）は12ヘッド
-        model = GPT2(params, n_head=12)
+        model = load_gpt2_weights(model_id, verbose=verbose)
 
     # 2. 入力をトークン化
     input_ids = tokenizer.encode(prompt)
@@ -152,8 +149,7 @@ def main():
         tokenizer = SentencePieceTokenizer(args.model)
     else:
         tokenizer = Tokenizer(args.model)
-    params = load_gpt2_weights(args.model, verbose=args.verbose)
-    model = GPT2(params, n_head=12)
+    model = load_gpt2_weights(args.model, verbose=args.verbose)
 
     for prompt_text in args.prompt:
         for _ in range(args.repeat):

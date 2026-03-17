@@ -16,9 +16,8 @@ if not os.path.exists(f"weights/{model_id}"):
 
 print("--- MLP（Multi-Layer Perceptron） ---")
 print("重みをロード中...")
-params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
-n_head = 12
+model = load_gpt2_weights(model_id)
 
 # 入力テキスト
 text = "The capital of France is"
@@ -26,9 +25,9 @@ input_ids = tokenizer.encode(text)
 tokens = [tokenizer.decode([i]) for i in input_ids]
 
 # Embedding → LayerNorm → Attention → 残差接続 → LayerNorm（MLP の入力を準備）
-x = params.wte[input_ids] + params.wpe[np.arange(len(input_ids))]
-block = params.blocks[0]
-x_after_attn = x + block.attn(block.ln_1(x), n_head=n_head)
+x = model.wte[input_ids] + model.wpe[np.arange(len(input_ids))]
+block = model.blocks[0]
+x_after_attn = x + block.attn(block.ln_1(x))
 x_ln2 = block.ln_2(x_after_attn)
 
 print(f"\n入力: '{text}'")

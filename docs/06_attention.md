@@ -53,7 +53,7 @@ GPT-2 では各トークンを768次元のベクトルで表し、それを12個
 Q, K, V の生成と出力射影に使う重みとバイアスは safetensors ファイルから読み込まれます。
 
 ```python
-AttentionParams(
+Attention(
     n_head=12,
     w_qkv=weights["h.0.attn.c_attn.weight"],  # (768, 2304) Q,K,V 結合
     b_qkv=weights["h.0.attn.c_attn.bias"],    # (2304,)
@@ -65,9 +65,8 @@ AttentionParams(
 `c_attn` の重み行列は 768×2304 で、2304 = 768×3（Q, K, V の3つ分）です。1回の行列積で Q, K, V をまとめて計算し、3分割します。
 
 ```python
-class AttentionParams:
-    def __call__(self, x, n_head=None):
-        n_head = n_head or self.n_head
+class Attention:
+    def __call__(self, x):
         # 768次元の入力に (768, 2304) の重み行列を掛け、Q,K,V を一括計算
         qkv = x @ self.w_qkv + self.b_qkv
         # 2304次元を3等分して Q, K, V（各768次元）に分離

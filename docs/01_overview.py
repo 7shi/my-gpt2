@@ -4,7 +4,7 @@ import numpy as np
 from safetensors.numpy import load_file
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import TransformerBlock, softmax
+from my_gpt2.model import softmax
 
 model_id = "openai-community/gpt2"
 if not os.path.exists(f"weights/{model_id}"):
@@ -27,9 +27,8 @@ del model_weights  # メモリ節約のため削除
 
 # モデルの読み込み
 print("\n重みをロード中...")
-params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
-n_head = 12
+model = load_gpt2_weights(model_id)
 
 # 入力テキスト
 text = "The capital of France is"
@@ -47,7 +46,7 @@ print(f"  トークンID: {input_ids}")
 # ステップ 1: Embedding
 print("\n" + "=" * 50)
 print("Step 1: Embedding (トークン埋め込み + 位置埋め込み)")
-x = params.wte[input_ids] + params.wpe[np.arange(len(input_ids))]
+x = model.wte[input_ids] + model.wpe[np.arange(len(input_ids))]
 print(f"  形状: {x.shape}  (トークン数, 埋め込み次元)")
 print(f"  平均: {np.mean(x):.4f}, 標準偏差: {np.std(x):.4f}")
 
@@ -56,21 +55,20 @@ print("\n" + "=" * 50)
 print("Step 2: Transformer Block × 12")
 print(f"| {'層'} | {'平均'} | {'標準偏差'} |")
 print(f"|---:|---:|---:|")
-for i, block_params in enumerate(params.blocks):
-    block = TransformerBlock(block_params, n_head)
+for i, block in enumerate(model.blocks):
     x = block(x)
     print(f"| {i} | {np.mean(x):.4f} | {np.std(x):.4f} |")
 
 # ステップ 3: 最終 LayerNorm
 print("\n" + "=" * 50)
 print("Step 3: 最終 LayerNorm")
-x = params.ln_f(x)
+x = model.ln_f(x)
 print(f"  平均: {np.mean(x):.4f}, 標準偏差: {np.std(x):.4f}")
 
 # ステップ 4: LM Head (Weight Tying)
 print("\n" + "=" * 50)
 print("Step 4: LM Head (Weight Tying: x @ wte.T)")
-logits = x @ params.wte.T
+logits = x @ model.wte.T
 print(f"  形状: {logits.shape}  (トークン数, 語彙数)")
 
 # ステップ 5: サンプリング
@@ -87,10 +85,10 @@ print("\n" + "=" * 50)
 print("自己回帰生成（20トークン）")
 generated = list(input_ids)
 for _ in range(20):
-    x = params.wte[generated] + params.wpe[np.arange(len(generated))]
-    for block_params in params.blocks:
-        x = TransformerBlock(block_params, n_head)(x)
-    x = params.ln_f(x)
-    next_id = int(np.argmax((x @ params.wte.T)[-1]))
+    x = model.wte[generated] + model.wpe[np.arange(len(generated))]
+    for block in model.blocks:
+        x = block(x)
+    x = model.ln_f(x)
+    next_id = int(np.argmax((x @ model.wte.T)[-1]))
     generated.append(next_id)
 print(f"> {tokenizer.decode(generated)}")

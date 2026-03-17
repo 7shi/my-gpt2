@@ -1,7 +1,7 @@
 import numpy as np
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import GPT2, softmax
+from my_gpt2.model import softmax
 import os
 import sys
 
@@ -19,9 +19,8 @@ if not os.path.exists(f"weights/{model_id}"):
 
 print("--- 出力とサンプリング ---")
 print("重みをロード中...")
-params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
-model = GPT2(params, n_head=12)
+model = load_gpt2_weights(model_id)
 
 prompt = "Artificial Intelligence will"
 input_ids = tokenizer.encode(prompt)
@@ -67,6 +66,6 @@ print(f"\n  生成結果: '{final}'")
 # 3. Weight Tying の確認
 print("\n" + "=" * 50)
 print("3. Weight Tying: 入力と出力で同じ行列を使用")
-print(f"  WTE 形状: {params.wte.shape}  (入力: トークンID → ベクトル)")
-print(f"  LM Head:  WTE.T = {params.wte.T.shape}  (出力: ベクトル → ロジット)")
-print(f"  共有パラメータ数: {params.wte.size:,} ({params.wte.size * 4 / 1024 / 1024:.1f} MB)")
+print(f"  WTE 形状: {model.wte.shape}  (入力: トークンID → ベクトル)")
+print(f"  LM Head:  WTE.T = {model.wte.T.shape}  (出力: ベクトル → ロジット)")
+print(f"  共有パラメータ数: {model.wte.size:,} ({model.wte.size * 4 / 1024 / 1024:.1f} MB)")
