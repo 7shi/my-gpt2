@@ -152,9 +152,3 @@ def attention(q, k, v, mask=None):
 
     probs = softmax(scores)
     return probs @ v
-
-def main():
-    print("GPT-2の基本関数が実装されています。")
-
-if __name__ == "__main__":
-    main()
