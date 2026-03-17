@@ -1,9 +1,10 @@
-import numpy as np
-from my_gpt2.tokenizer import Tokenizer
-from my_gpt2.loader import load_gpt2_weights
-from my_gpt2.model import GPT2, TransformerBlock, softmax
 import os
 import sys
+import numpy as np
+from safetensors.numpy import load_file
+from my_gpt2.tokenizer import Tokenizer
+from my_gpt2.loader import load_gpt2_weights
+from my_gpt2.model import TransformerBlock, softmax
 
 model_id = "openai-community/gpt2"
 if not os.path.exists(f"weights/{model_id}"):
@@ -12,7 +13,20 @@ if not os.path.exists(f"weights/{model_id}"):
     sys.exit(1)
 
 print("--- GPT-2 推論パイプライン全体像 ---")
-print("重みをロード中...")
+
+# safetensors のキー構造を確認
+print("\n" + "=" * 50)
+print("重みファイルのキー一覧（model.safetensors）")
+model_weights = load_file(f"weights/{model_id}/model.safetensors")
+print(f"| {'キー':<38s} | {'形状':<18s} |")
+print(f"|{'-' * 42}|{'-' * 22}|")
+for key in sorted(model_weights):
+    print(f"| {key:<40s} | {str(model_weights[key].shape):<20s} |")
+print(f"\n合計: {len(model_weights)} キー")
+del model_weights  # メモリ節約のため削除
+
+# モデルの読み込み
+print("\n重みをロード中...")
 params = load_gpt2_weights(model_id)
 tokenizer = Tokenizer(model_id)
 n_head = 12
