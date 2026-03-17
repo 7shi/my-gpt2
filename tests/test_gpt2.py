@@ -24,9 +24,9 @@ def test_softmax():
 def test_layer_norm():
     x = np.random.randn(10, 768) # 768はGPT-2の埋め込みサイズ
     # GPT-2では g（ガンマ）と b（ベータ）がパラメータ
-    params = LayerNorm(g=np.ones(768), b=np.zeros(768))
+    ln = LayerNorm(g=np.ones(768), b=np.zeros(768))
 
-    out = params(x)
+    out = ln(x)
 
     # レイヤー正規化後、最終軸方向の平均は約0、標準偏差は約1になるはず
     assert np.allclose(np.mean(out, axis=-1), 0.0, atol=1e-5)

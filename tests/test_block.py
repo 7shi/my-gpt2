@@ -9,11 +9,11 @@ def test_transformer_block_shape():
     block = TransformerBlock(
         ln_1=LayerNorm(g=np.ones(embed_dim), b=np.zeros(embed_dim)),
         attn=Attention(
+            n_head=n_head,
             w_qkv=np.random.randn(embed_dim, 3 * embed_dim),
             b_qkv=np.zeros(3 * embed_dim),
             w_out=np.random.randn(embed_dim, embed_dim),
             b_out=np.zeros(embed_dim),
-            n_head=n_head,
         ),
         ln_2=LayerNorm(g=np.ones(embed_dim), b=np.zeros(embed_dim)),
         mlp=MLP(

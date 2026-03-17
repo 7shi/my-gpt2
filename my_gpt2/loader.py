@@ -35,13 +35,13 @@ def load_gpt2_weights(model_id="openai-community/gpt2", verbose=False):
                 b=weights[f"{prefix}h.{i}.ln_1.bias"],
             ),
             attn=Attention(
+                n_head=n_head,
                 # GPT-2のConv1D重みは既に(embed_dim, out_dim)形式なので
                 # x @ w_qkv をそのまま使える。転置は不要。
                 w_qkv=weights[f"{prefix}h.{i}.attn.c_attn.weight"],
                 b_qkv=weights[f"{prefix}h.{i}.attn.c_attn.bias"],
                 w_out=weights[f"{prefix}h.{i}.attn.c_proj.weight"],
                 b_out=weights[f"{prefix}h.{i}.attn.c_proj.bias"],
-                n_head=n_head,
             ),
             ln_2=LayerNorm(
                 g=weights[f"{prefix}h.{i}.ln_2.weight"],

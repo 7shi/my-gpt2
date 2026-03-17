@@ -15,11 +15,11 @@ class LayerNorm:
 
 @dataclass
 class Attention:
+    n_head: int
     w_qkv: np.ndarray
     b_qkv: np.ndarray
     w_out: np.ndarray
     b_out: np.ndarray
-    n_head: int
 
     def __call__(self, x, kv_cache=_no_cache):
         seq_len, embed_dim = x.shape
