@@ -110,7 +110,7 @@ print(f"  文A: '{texts[0]}'")
 print(f"  文B: '{texts[1]}'")
 print(f"  比較対象: '{target_word}' のベクトル")
 print()
-print(f"|層 | 文A-文B コサイン類似度 |")
+print(f"|層 | AとBのコサイン類似度 |")
 print(f"|---|---|")
 for layer_idx in range(14):
     sim = cosine_similarity(vecs_by_layer[0][layer_idx], vecs_by_layer[1][layer_idx])

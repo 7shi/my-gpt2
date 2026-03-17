@@ -28,7 +28,7 @@
 
 ## 1. 残差接続 (Residual Connection)
 
-Transformer Block の内部は次の構造です。GPT-2 small ではこのブロックを12個積み重ねることで、テキストの高度な意味表現を獲得します。
+Transformer Block の内部は次の構造です。GPT-2 ではこのブロックを12個積み重ねることで、テキストの高度な意味表現を獲得します。
 
 ```
 Input ─────┐
@@ -46,7 +46,7 @@ MLP        │
   ↓        │
 (+) ←──────┘ 残差接続
   ↓
-出力 x
+Output
 ```
 
 `(+)` が**残差接続**で、各処理の出力を元の入力に加算する仕組みです。
@@ -123,12 +123,12 @@ x = self.ln_f(x)
 
 同じ単語「bank」でも、周囲の文脈によって異なるベクトルに変化します。
 
-- 文 A: "The river bank was covered"
-- 文 B: "The money bank was covered"
+- A: "The river bank was covered"
+- B: "The money bank was covered"
 
-"bank" に相当するトークンのベクトルが、文 A と文 B とでどのように変化するかを比較してみます。
+"bank" に相当するトークンのベクトルが、A と B でどのように変化するかを比較してみます。
 
-| 層 | コサイン類似度 | |
+| 層 | AとBのコサイン類似度 | 備考 |
 |---|--:|---|
 | Embedding | 1.0000 | 同じ単語なので完全一致 |
 | 0 | 0.9421 | |
