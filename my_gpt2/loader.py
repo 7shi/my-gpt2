@@ -13,7 +13,10 @@ def load_gpt2_weights(model_id="openai-community/gpt2", verbose=False):
     # config.json を読み込む
     with open(f"{weights_dir}/config.json") as f:
         config = json.load(f)
+    n_layer = config["n_layer"]
     n_head = config["n_head"]
+    if verbose:
+        print(f"トランスフォーマーブロック数: {n_layer}, ヘッド数: {n_head}")
 
     # 重みをnumpy配列として読み込む
     if verbose:
@@ -22,10 +25,6 @@ def load_gpt2_weights(model_id="openai-community/gpt2", verbose=False):
 
     # paramsの構造にマッピング
     prefix = "transformer." if "transformer.wte.weight" in weights else ""
-
-    n_layer = sum(1 for key in weights.keys() if key.endswith(".ln_1.weight"))
-    if verbose:
-        print(f"トランスフォーマーブロック数: {n_layer}")
 
     blocks = []
     for i in range(n_layer):
