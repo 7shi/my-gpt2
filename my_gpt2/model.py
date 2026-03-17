@@ -24,7 +24,7 @@ class AttentionParams:
     def __call__(self, x, n_head=None, kv_cache=_no_cache):
         n_head = n_head or self.n_head
         seq_len, embed_dim = x.shape
-        qkv = np.matmul(x, self.w_qkv) + self.b_qkv
+        qkv = x @ self.w_qkv + self.b_qkv
 
         q, k, v = np.split(qkv, 3, axis=-1)
         head_size = embed_dim // n_head
@@ -42,13 +42,13 @@ class AttentionParams:
             mask = np.tril(np.ones((kv_len, kv_len)))[-seq_len:]
             out = attention(q, k, v, mask=mask)
             out = out.transpose(1, 0, 2).reshape(seq_len, embed_dim)
-            return np.matmul(out, self.w_out) + self.b_out, (k, v)
+            return out @ self.w_out + self.b_out, (k, v)
 
         mask = np.tril(np.ones((seq_len, seq_len)))
         out = attention(q, k, v, mask=mask)
 
         out = out.transpose(1, 0, 2).reshape(seq_len, embed_dim)
-        return np.matmul(out, self.w_out) + self.b_out
+        return out @ self.w_out + self.b_out
 
 @dataclass
 class MLPParams:
@@ -58,8 +58,8 @@ class MLPParams:
     b_proj: np.ndarray
 
     def __call__(self, x):
-        a = gelu(np.matmul(x, self.w_fc) + self.b_fc)
-        return np.matmul(a, self.w_proj) + self.b_proj
+        a = gelu(x @ self.w_fc + self.b_fc)
+        return a @ self.w_proj + self.b_proj
 
 @dataclass
 class BlockParams:
@@ -99,13 +99,13 @@ def attention(q, k, v, mask=None):
     mask: 因果マスク (seq_len, seq_len)
     """
     d_k = q.shape[-1]
-    scores = np.matmul(q, k.transpose(0, 2, 1)) / np.sqrt(d_k)
+    scores = q @ k.transpose(0, 2, 1) / np.sqrt(d_k)
 
     if mask is not None:
         scores = np.where(mask == 0, -1e10, scores)
 
     probs = softmax(scores)
-    return np.matmul(probs, v)
+    return probs @ v
 
 class TransformerBlock:
     """
@@ -161,7 +161,7 @@ class GPT2:
                 x, layer_cache = block(x, kv_cache=layer_cache)
                 new_kv_cache.append(layer_cache)
             x = self.ln_f(x)
-            return np.matmul(x, self.wte.T), new_kv_cache
+            return x @ self.wte.T, new_kv_cache
 
         # トランスフォーマーブロック
         for block in self.blocks:
@@ -171,7 +171,7 @@ class GPT2:
         x = self.ln_f(x)
 
         # 言語モデルヘッド（重み共有）
-        return np.matmul(x, self.wte.T)
+        return x @ self.wte.T
 
 def main():
     print("GPT-2の基本関数が実装されています。")

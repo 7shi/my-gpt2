@@ -16,7 +16,7 @@ def __call__(self, input_ids):
     for block in self.blocks:
         x = block(x)
     x = self.ln_f(x)
-    return np.matmul(x, self.wte.T)
+    return x @ self.wte.T
 ```
 
 これを上から読むと、GPT-2 は3つの段階で構成されていることがわかります。

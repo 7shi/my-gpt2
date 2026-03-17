@@ -10,7 +10,7 @@ def cosine_similarity(v1, v2):
 
 def find_nearest(target_vec, wte, top_k=5):
     """対象ベクトルに最も近いトークンを探す。"""
-    dot_products = np.matmul(wte, target_vec)
+    dot_products = wte @ target_vec
     norms = np.linalg.norm(wte, axis=1) * np.linalg.norm(target_vec)
     similarities = np.divide(dot_products, norms, out=np.zeros_like(dot_products), where=norms!=0)
     nearest_indices = np.argsort(similarities)[::-1][:top_k]

@@ -38,11 +38,11 @@ print(f"トークン: {tokens}")
 print("\n" + "=" * 50)
 print("1. MLP の次元変化: 768 → 3072 → 768")
 # 中間層を手動で計算
-intermediate = np.matmul(x_ln2, block.mlp.w_fc) + block.mlp.b_fc
+intermediate = x_ln2 @ block.mlp.w_fc + block.mlp.b_fc
 print(f"  入力:   {x_ln2.shape}  （768次元）")
 print(f"  中間層: {intermediate.shape}  （3072次元 = 768 × 4）")
 activated = gelu(intermediate)
-output = np.matmul(activated, block.mlp.w_proj) + block.mlp.b_proj
+output = activated @ block.mlp.w_proj + block.mlp.b_proj
 print(f"  出力:   {output.shape}  （768次元に戻る）")
 
 # 2. GELU 活性化の効果

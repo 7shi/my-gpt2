@@ -8,14 +8,14 @@ import sys
 def mha_scores(x, w_qkv, b_qkv, n_head):
     """Multi-Head Attention のスコア（注目度分布）を計算する。"""
     batch_size, seq_len, embed_dim = x.shape
-    qkv = np.matmul(x, w_qkv) + b_qkv
+    qkv = x @ w_qkv + b_qkv
     q, k, v = np.split(qkv, 3, axis=-1)
 
     d_k = embed_dim // n_head
     q = q.reshape(batch_size, seq_len, n_head, d_k).transpose(0, 2, 1, 3)
     k = k.reshape(batch_size, seq_len, n_head, d_k).transpose(0, 2, 1, 3)
 
-    scores = np.matmul(q, k.transpose(0, 1, 3, 2)) / np.sqrt(d_k)
+    scores = q @ k.transpose(0, 1, 3, 2) / np.sqrt(d_k)
 
     # 因果マスキング
     mask = np.tril(np.ones((seq_len, seq_len)))
