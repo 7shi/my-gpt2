@@ -16,7 +16,7 @@ md_files = sorted(script_dir.glob("[0-9][0-9]_*.md"))
 def make_nav(current):
     parts = []
     for i, path in enumerate(md_files, start=1):
-        parts.append(f"**{i}**" if path == current else f"[{i}]({path.name})")
+        parts.append(f"**{i:02d}**" if path == current else f"[{i:02d}]({path.name})")
     return "ページ：" + " | ".join(parts)
 
 # 各ファイルの "ページ：" 行を置換する

@@ -1,4 +1,4 @@
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | [10](10_kv_cache.md) | **11**
+ページ：[01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | **11**
 
 ---
 
@@ -50,7 +50,7 @@ MLP        │
 Output
 ```
 
-08 では残差接続を「勾配消失の防止」という学習上の利点から説明しました。ここでは推論時の情報の流れに注目します。
+残差接続（👉[08](08_residual.md)）を「勾配消失の防止」という学習上の利点から説明しました。ここでは推論時の情報の流れに注目します。
 
 `x = x + f(x)` という構造を、「`x` という幹線に `f(x)` が情報を書き込む」と読み替えます。この幹線を**残差ストリーム（Residual Stream）** と呼びます。
 
@@ -91,7 +91,7 @@ Attention がトークン間の「横方向」の処理なら、MLP はトーク
 
 ## 4. 12層の意味
 
-08 で観察したように、層を経るごとに Embedding との cos 類似度は急速に低下します。これは各層が異なる抽象度の特徴を担っていることを示唆しています。
+層を経るごとに Embedding との cos 類似度は急速に低下します（👉[08](08_residual.md)）。これは各層が異なる抽象度の特徴を担っていることを示唆しています。
 
 一般的に、Transformer の各層は以下のような傾向を持つことが知られています。
 
@@ -116,7 +116,7 @@ x = self.ln_f(x)                   # LM Head の前
 
 ブロック内の LayerNorm は Attention/MLP への入力を正規化し、計算を安定させます。残差ストリーム上の `x` 自体は正規化されず、情報がそのまま保持されます。
 
-最終 LayerNorm（ln_f）は、12層で蓄積されたスケールの増大（08 で観察: 標準偏差 0.22 → 14.2）を出力層の前に整える役割です。
+最終 LayerNorm（ln_f）は、12層で蓄積されたスケールの増大（👉[08](08_residual.md) で観察: 標準偏差 0.22 → 14.2）を出力層の前に整える役割です。
 
 ## 6. GPT-2 から現代の LLM へ
 
@@ -134,10 +134,10 @@ GPT-2 のアーキテクチャは、現代の LLM の基本形です。GPT-4 や
 | 活性化関数 | GELU | SwiGLU |
 | Attention | 標準 MHA | GQA / MLA |
 
-Attention の行に注目すると、GQA（Grouped Query Attention）や MLA（Multi-head Latent Attention）は、KV キャッシュ（10 参照）のメモリ削減を主な動機としています。標準の MHA では全ヘッドが独立に K, V を持つため、層数やコンテキスト長の増大に伴いキャッシュが膨大になります。GQA は複数のヘッドで K, V を共有することで、推論時のメモリ使用量を抑えます。
+Attention の行に注目すると、GQA（Grouped Query Attention）や MLA（Multi-head Latent Attention）は、KV キャッシュ（👉[10](10_kv_cache.md)）のメモリ削減を主な動機としています。標準の MHA では全ヘッドが独立に K, V を持つため、層数やコンテキスト長の増大に伴いキャッシュが膨大になります。GQA は複数のヘッドで K, V を共有することで、推論時のメモリ使用量を抑えます。
 
 構造の違いは効率やスケーラビリティの改善であり、「残差ストリーム上で Attention と MLP を繰り返す」という根本的な設計は共通しています。GPT-2 の約400行の実装で理解した原理は、そのまま現代の LLM に通じます。
 
 ---
 
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | [10](10_kv_cache.md) | **11**
+ページ：[01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | **11**

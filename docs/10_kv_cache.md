@@ -1,10 +1,10 @@
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | **10** | [11](11_architecture.md)
+ページ：[01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | **10** | [11](11_architecture.md)
 
 ---
 
 # KV キャッシュ: 自己回帰生成の高速化
 
-09 で見たように、GPT-2 は自己回帰で1トークンずつ生成します。素朴な実装では毎回全トークンを再計算しますが、KV キャッシュを使うと新しいトークンの計算だけで済みます。
+GPT-2 は自己回帰で1トークンずつ生成します（👉[09](09_output.md)）。素朴な実装では毎回全トークンを再計算しますが、KV キャッシュを使うと新しいトークンの計算だけで済みます。
 
 1. テキスト
    - トークナイザー
@@ -28,7 +28,7 @@
 
 ## 1. 毎回の再計算という問題
 
-09 の自己回帰生成では、トークンを1つ生成するたびに入力全体をモデルに通していました。
+自己回帰生成（👉[09](09_output.md)）では、トークンを1つ生成するたびに入力全体をモデルに通していました。
 
 ```
 Step 1: [A, B, C]       → 全3トークンを計算 → 次のトークン D
@@ -36,7 +36,7 @@ Step 2: [A, B, C, D]    → 全4トークンを計算 → 次のトークン E
 Step 3: [A, B, C, D, E] → 全5トークンを計算 → 次のトークン F
 ```
 
-しかし因果マスク（06 参照）により、各トークンは自分より後のトークンを参照できません。つまり Step 2 で A, B, C の Attention 計算結果は Step 1 と同じです。毎回同じ計算を繰り返しているのは無駄です。
+しかし因果マスク（👉[06](06_attention.md)）により、各トークンは自分より後のトークンを参照できません。つまり Step 2 で A, B, C の Attention 計算結果は Step 1 と同じです。毎回同じ計算を繰り返しているのは無駄です。
 
 そこで、Attention で計算した Key と Value を保存しておき、次のステップではそれを再利用する手法が **KV キャッシュ** です。これを使うと、生成ループは次のように変わります。
 
@@ -57,7 +57,7 @@ for _ in range(n_tokens_to_generate - 1):
 
 ## 2. KV キャッシュの仕組み
 
-Attention の計算は Q × K^T → Softmax → × V という流れです（06 参照）。因果マスクにより、過去のトークンの **Key（K）** と **Value（V）** は新しいトークンが追加されても変わりません。そこで、計算済みの K と V を保存（キャッシュ）しておき、新しいトークンの K, V だけを追加します。
+Attention の計算は Q × K^T → Softmax → × V という流れです（👉[06](06_attention.md)）。因果マスクにより、過去のトークンの **Key（K）** と **Value（V）** は新しいトークンが追加されても変わりません。そこで、計算済みの K と V を保存（キャッシュ）しておき、新しいトークンの K, V だけを追加します。
 
 ```
 Prefill:  [A, B, C] → Q,K,V を全て計算 → K,V をキャッシュに保存
@@ -174,4 +174,4 @@ uv run docs/10_kv_cache.py
 
 ---
 
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | [6](06_attention.md) | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | **10** | [11](11_architecture.md)
+ページ：[01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | **10** | [11](11_architecture.md)

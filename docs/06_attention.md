@@ -1,10 +1,10 @@
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | **6** | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：[01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | **06** | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
 
 ---
 
 # Attention: 文脈の理解
 
-Attention は GPT-2 が「文脈」を理解するための最も重要なコンポーネントです。各トークンが他のトークンとの関係性を計算し、文脈を取り込んだベクトルへと自身を更新します。LayerNorm（[05](05_layer_norm.md) 参照）を適用した後のベクトルに対して、この処理が行われます。
+Attention は GPT-2 が「文脈」を理解するための最も重要なコンポーネントです。各トークンが他のトークンとの関係性を計算し、文脈を取り込んだベクトルへと自身を更新します。LayerNorm（👉[05](05_layer_norm.md)）を適用した後のベクトルに対して、この処理が行われます。
 
 1. テキスト
    - トークナイザー
@@ -60,7 +60,17 @@ scores = q @ k.transpose(0, 1, 3, 2) / np.sqrt(d_k)
 
 次元数が大きいと内積の値が非常に大きくなり、Softmax の出力が「ほぼ1箇所だけ1で他は0」という極端な分布になります。$\sqrt{d_k}$ で割ることで値を適正な範囲に保ち、学習を安定させます。
 
-## 3. 因果マスキング（Causal Masking）
+## 3. Softmax
+
+スコアを確率分布に変換するために **Softmax** を適用します。各スコアの指数 $e^{z_i}$ を取り、合計で割ることで、全体の和が 1 になるよう正規化します。
+
+$$\text{softmax}(z_i) = \frac{e^{z_i}}{\sum_j e^{z_j}}$$
+
+分母 $\sum_j e^{z_j}$ は統計力学の分配関数に対応します。最もスコアが高い要素に高い確率が割り当てられ、スコアの差が大きいほど確率の偏りも大きくなります。
+
+前節のスケーリングはこの Softmax の性質と密接に関係しています。スケーリングなしでスコアが大きくなりすぎると、Softmax の出力がほぼ one-hot（1箇所だけ 1 で他は 0）になり、他のトークンからの情報を取り込めなくなります。
+
+## 4. 因果マスキング（Causal Masking）
 
 GPT-2 は「次の単語を予測する」モデルであるため、未来の単語を見てはいけません。下三角行列を使って、未来のスコアを $-10^{10}$ で上書きし、Softmax 後に影響が 0 になるようにします。
 
@@ -87,7 +97,7 @@ tok3  [  s     s     s     s   ]
     -> The        : 1.0000
 ```
 
-## 4. Multi-Head の統合
+## 5. Multi-Head の統合
 
 12個のヘッドが並列に異なる「注目パターン」を学習します。
 
@@ -120,4 +130,4 @@ uv run docs/06_attention.py
 
 ---
 
-ページ：[1](01_overview.md) | [2](02_tokenizer.md) | [3](03_spiece.md) | [4](04_embedding.md) | [5](05_layer_norm.md) | **6** | [7](07_mlp.md) | [8](08_residual.md) | [9](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：[01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | **06** | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
