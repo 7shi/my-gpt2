@@ -118,12 +118,12 @@ x = wte[input_ids] + wpe[np.arange(len(input_ids))]
 
 # Step 2: Transformer Block × 12 — 文脈理解と特徴変換を繰り返す
 for block in blocks:
-    y = block.ln_1(x)
-    y = block.attn(y)
-    x = x + y  # 残差接続
-    z = block.ln_2(x)
-    z = block.mlp(z)
-    x = x + z  # 残差接続
+    y = block.ln_1(x)  # 正規化
+    y = block.attn(y)  # 文脈理解
+    x = x + y          # 残差接続（足し算）
+    z = block.ln_2(x)  # 正規化
+    z = block.mlp(z)   # 特徴変換
+    x = x + z          # 残差接続（足し算）
 
 # Step 3: 最終 LayerNorm — 出力前の正規化
 x = ln_f(x)
@@ -133,7 +133,7 @@ logits = x @ wte.T  # 行列の積
 
 # Step 5: サンプリング — 確率分布から次のトークンを選択
 probs = softmax(logits[-1])  # 最後のロジットを 0～1 の確率に変換
-next_id = np.argmax(probs)  # greedy decoding
+next_id = np.argmax(probs)   # 貪欲法で最も確率の高いトークンを選択
 ```
 
 `x` は実際には複数のベクトルを並べて行列の形式でまとめたものですが、各ベクトルに対して同じ操作を行うため、コメントではベクトルとして説明しています。
@@ -245,11 +245,11 @@ probs = softmax(logits[-1])
 
 "Paris" が上位に入っており、モデルがフランスの首都についての知識を持っていることが分かります。
 
-### 自己回帰生成
+### 文章の生成
 
 この予測を繰り返すことで文章を生成できます。生成したトークンを入力に追加し、再度パイプラインを実行する、という操作を繰り返す仕組みを**自己回帰生成**といいます。
 
-各ステップで確率最大のトークンを選んだ結果を示します。この方式を **greedy decoding** といい、結果は常に同じになります。
+各ステップで確率最大のトークンを選んだ結果を示します。この方式を**貪欲法** (greedy decoding) と呼び、ランダム性がないため結果は常に同じになります。
 
 ```python
 next_id = np.argmax(probs)
@@ -257,7 +257,7 @@ next_id = np.argmax(probs)
 
 > The capital of France is the capital of the French Republic, and the capital of the French Republic is the capital of the French
 
-このように同じフレーズが繰り返されやすいのも greedy decoding の特徴です。
+このように同じフレーズが繰り返されやすいのも貪欲法の特徴です。
 
 ---
 

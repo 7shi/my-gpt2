@@ -86,7 +86,7 @@ for _ in range(n_tokens_to_generate):
     input_ids.append(next_token)
 ```
 
-毎回入力全体をモデルに通し、最後のトークンの確率分布から次のトークンを選びます。この例は greedy（最も確率が高いトークンを選択）ですが、Temperature や Top-k/Top-p を組み合わせたサンプリングも可能です。
+毎回入力全体をモデルに通し、最後のトークンの確率分布から次のトークンを選びます。この例は貪欲法（最も確率が高いトークンを選択）ですが、Temperature や Top-k/Top-p を組み合わせたサンプリングも可能です。
 
 ```
 Step 1: 'Artificial Intelligence will' → 候補: ' be'(0.184), ' become'(0.036)...
