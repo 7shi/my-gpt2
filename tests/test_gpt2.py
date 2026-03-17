@@ -22,7 +22,7 @@ def test_softmax():
     assert np.isclose(np.sum(probs_large), 1.0)
 
 def test_layer_norm():
-    x = np.random.randn(10, 768) # 768はGPT-2 smallの埋め込みサイズ
+    x = np.random.randn(10, 768) # 768はGPT-2の埋め込みサイズ
     # GPT-2では g（ガンマ）と b（ベータ）がパラメータ
     params = LayerNormParams(g=np.ones(768), b=np.zeros(768))
 

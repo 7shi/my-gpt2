@@ -3,7 +3,7 @@ import pytest
 from my_gpt2.model import AttentionParams
 
 def test_mha_shape():
-    seq_len, embed_dim = 10, 768  # GPT-2 small
+    seq_len, embed_dim = 10, 768  # GPT-2
     n_head = 12
     x = np.random.randn(seq_len, embed_dim)
 

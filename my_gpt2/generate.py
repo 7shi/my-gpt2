@@ -17,7 +17,7 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p
             tokenizer = Tokenizer(model_id)
     if model is None:
         params = load_gpt2_weights(model_id, verbose=verbose)
-        # GPT-2 small（124M）は12ヘッド
+        # GPT-2（124M）は12ヘッド
         model = GPT2(params, n_head=12)
 
     # 2. 入力をトークン化

@@ -48,14 +48,19 @@ LayerNormParams(
 LayerNorm では、各トークンのベクトル全成分の平均と分散を計算して正規化し、γ/β を成分ごとに適用して学習済みのスケール感を与えます。
 
 ```python
-def __call__(self, x, eps=1e-5):
-    mean = np.mean(x, axis=-1, keepdims=True)      # トークンごとの平均
-    variance = np.var(x, axis=-1, keepdims=True)   # トークンごとの分散
-    x_norm = (x - mean) / np.sqrt(variance + eps)  # 平均0・分散1に正規化
-    return self.g * x_norm + self.b                # γ でスケール、β でシフト
+class LayerNormParams:
+    def __call__(self, x, eps=1e-5):
+        # 768次元の全成分についてトークンごとの平均を計算
+        mean = np.mean(x, axis=-1, keepdims=True)
+        # 同様に分散を計算（ばらつきの指標）
+        variance = np.var(x, axis=-1, keepdims=True)
+        # 平均を引いて標準偏差で割り、平均0・分散1に正規化
+        x_norm = (x - mean) / np.sqrt(variance + eps)
+        # γ で次元ごとにスケールし、β でシフト（アダマール積）
+        return self.g * x_norm + self.b
 ```
 
-`self.g * x_norm` は行列積ではなく**アダマール積**（要素ごとの積）です。γ と β はそれぞれ 768 次元のベクトルで、各次元を独立してスケール・シフトします。次元間の情報は混合しないため、「次元ごとのアフィン変換」とも呼ばれます。
+`self.g * x_norm` は行列積ではなく**アダマール積**（成分ごとの積）です。γ と β はそれぞれ 768 次元のベクトルで、各次元を独立してスケール・シフトします。次元間の情報は混合しないため、「次元ごとのアフィン変換」とも呼ばれます。
 
 ### LayerNorm の効果
 
