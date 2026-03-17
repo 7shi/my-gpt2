@@ -52,13 +52,14 @@ for step in range(3):
     next_logits = logits[-1, :]
 
     top = get_top_tokens(next_logits, tokenizer)
-    print(f"\n  Step {step + 1}: 次のトークン候補")
-    for i, (token, prob) in enumerate(top):
-        print(f"    {i+1}. '{token:12}' : {prob:.4f}")
+    current_text = tokenizer.decode(current_ids)
+    print(f"\n  Step {step + 1}: '{current_text}'")
+    top_str = ", ".join(f"'{t}' ({p:.3f})" for t, p in top[:3])
+    print(f"    → 候補: {top_str}...")
 
     next_token = int(np.argmax(next_logits))
     current_ids.append(next_token)
-    print(f"  → 選択: '{tokenizer.decode([next_token])}'")
+    print(f"    → 選択: '{tokenizer.decode([next_token])}'")
 
 final = tokenizer.decode(current_ids)
 print(f"\n  生成結果: '{final}'")

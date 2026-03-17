@@ -50,6 +50,10 @@ return x @ self.wte.T  # → (len(x), 50257)
 
 ロジットが最も高いトークンに最も高い確率が割り当てられ、スコアの差が大きいほど確率の偏りも大きくなります。
 
+```python
+probs = softmax(next_token_logits)  # ロジットを確率分布に変換
+```
+
 ## 3. サンプリング手法
 
 Softmax で得た確率分布から次のトークンを選ぶ方法によって、生成されるテキストの性質が変わります。
@@ -58,11 +62,23 @@ Softmax で得た確率分布から次のトークンを選ぶ方法によって
 
 常に最も確率が高いトークンを選択します。決定論的でランダム性がないため結果は常に同じになりますが、長い文章ではループが発生しやすくなります。
 
+```python
+next_token = int(np.argmax(next_token_logits))
+```
+
 ループは局所最適で、窪地にハマり込んで抜けられなくなっているような状態です。その外側に脱出するためには、ランダム性を加える必要があります。
 
 ### Temperature
 
-ロジットを温度 T で割ってから Softmax を適用することで、確率分布の「尖り具合」を調整します。以下は Softmax 後の確率の例です。
+ロジットを温度 T で割ってから Softmax を適用することで、確率分布の「尖り具合」を調整します。
+
+```python
+next_token_logits = next_token_logits / temperature
+probs = softmax(next_token_logits)
+next_token = int(np.random.choice(len(probs), p=probs))
+```
+
+以下は Softmax 後の確率の例です。
 
 ```
 T=0.5（集中）: ' be' 0.787, ' become' 0.029, ' not' 0.029
@@ -77,11 +93,26 @@ T=2.0（平坦）: ' be' 0.013, ' become' 0.006, ' not' 0.006
 
 ### Top-k Sampling
 
-上位 $k$ 個のトークン以外を $-\infty$ にマスクしてから Softmax を適用します。候補数が常に $k$ 個に固定されます。
+上位 k 個のトークン以外を $-\infty$ にマスクしてから Softmax を適用します。候補数が常に k 個に固定されます。
+
+```python
+top_k_indices = np.argpartition(next_token_logits, -top_k)[-top_k:]
+mask = np.full_like(next_token_logits, -np.inf)
+mask[top_k_indices] = next_token_logits[top_k_indices]
+next_token_logits = mask
+```
 
 ### Top-p Sampling（Nucleus Sampling）
 
-Softmax 後の確率を高い順に並べ、累積確率が $p$ に達するまでのトークンだけを候補にします。語彙の分布に応じて候補数が動的に変わるため、Top-k より適応的です。
+Softmax 適用後の確率を高い順に並べ、累積確率が p に達するまでのトークンだけを候補にします。語彙の分布に応じて候補数が動的に変わるため、Top-k より適応的です。
+
+```python
+sorted_indices = np.argsort(probs)[::-1]
+cumulative_probs = np.cumsum(probs[sorted_indices])
+cutoff = np.searchsorted(cumulative_probs, top_p) + 1
+probs[sorted_indices[cutoff:]] = 0.0
+probs /= probs.sum()
+```
 
 Top-k と Top-p は組み合わせることができ、その場合は Top-k でマスクした後に Top-p を適用します。
 
@@ -99,17 +130,20 @@ for _ in range(n_tokens_to_generate):
 毎回入力全体をモデルに通し、最後のトークンの確率分布から次のトークンを選びます。この例は貪欲法（最も確率が高いトークンを選択）ですが、Temperature や Top-k/Top-p を組み合わせたサンプリングも可能です。
 
 ```
-Step 1: 'Artificial Intelligence will' → 候補: ' be'(0.184), ' become'(0.036)...
+Step 1: 'Artificial Intelligence will'
+  → 候補: ' be'(0.184), ' become'(0.036)...
   → 選択: ' be'
-Step 2: 'Artificial Intelligence will be' → 候補: ' able'(0.095), ' a'(0.085)...
+Step 2: 'Artificial Intelligence will be'
+  → 候補: ' able'(0.095), ' a'(0.085)...
   → 選択: ' able'
-Step 3: 'Artificial Intelligence will be able' → 候補: ' to'(0.991)
+Step 3: 'Artificial Intelligence will be able'
+  → 候補: ' to'(0.991)
   → 選択: ' to'（確信度が非常に高い）
 ```
 
-Step 3 では「be able」の後に「to」が来る確率が99%を超えています。文法的なパターンが確定すると、モデルの「迷い」は消え、決定的な振る舞いになります。
+Step 3 では「be able」の後に「to」が来る確率が99%を超えています。文法的なパターンが確定すると、モデルの「迷い」は消え、決定論的な振る舞いになります。
 
-なお、この素朴な実装では毎回全トークンを再計算しています。次で説明する KV キャッシュを使えば、新しいトークンの計算だけで済むようになります。
+なお、この素朴な実装では毎回全トークンを再計算しています。次回に説明する KV キャッシュを使えば、新しいトークンの計算だけで済むようになります。
 
 ## 実験：Temperature と自己回帰生成
 

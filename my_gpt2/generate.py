@@ -133,7 +133,7 @@ def main():
     # プロンプトの位置引数（1語以上）
     parser.add_argument("prompt", nargs="+", help="生成を開始するプロンプトテキスト")
     parser.add_argument("-n", "--n_tokens", type=int, default=30, help="生成するトークン数")
-    parser.add_argument("-t", "--temperature", type=float, default=1.0, help="サンプリング温度（低いほど決定的）")
+    parser.add_argument("-t", "--temperature", type=float, default=1.0, help="サンプリング温度（低いほど決定論的）")
     parser.add_argument("-k", "--top_k", type=int, default=None, help="top-k サンプリング（上位k個のトークンから選択）")
     parser.add_argument("-p", "--top_p", type=float, default=None, help="top-p サンプリング（累積確率p以内のトークンから選択）")
     parser.add_argument("-m", "--model", default="openai-community/gpt2", help="モデルID（例: openai-community/gpt2）")
