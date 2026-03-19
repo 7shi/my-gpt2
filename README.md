@@ -21,6 +21,8 @@
 
 | ドキュメント | テーマ | 実験 |
 |---|---|---|
+| [README](docs/README.md) | はじめに | |
+| [00_quickstart](docs/00_quickstart.md) | まず動かしてみよう — セットアップと生成体験 | |
 | [01_overview](docs/01_overview.md) | 推論パイプラインの全体像 | [実験](docs/01_overview.py) |
 | [02_tokenizer](docs/02_tokenizer.md) | バイトレベル BPE と Unicode マッピング | |
 | [03_spiece](docs/03_spiece.md) | SentencePiece トークナイザー（ユニグラムモデル） | |
