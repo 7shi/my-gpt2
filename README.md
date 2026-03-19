@@ -53,9 +53,11 @@ my-gpt2/
 ## 🛠️ セットアップと使用方法
 
 ### 1. 環境構築
-`uv` を使用して依存関係をインストールします。
+リポジトリをクローンして、依存関係をインストールします。
 
 ```bash
+git clone https://github.com/7shi/my-gpt2.git
+cd my-gpt2
 uv sync
 ```
 
