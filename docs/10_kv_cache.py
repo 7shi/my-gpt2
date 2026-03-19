@@ -72,10 +72,10 @@ print("\n" + "=" * 50)
 print("4. KV キャッシュの構造")
 print(f"  層数: {len(kv_cache)}")
 k, v = kv_cache[0]
-print(f"  Layer 0 の K の形状: {k.shape}  (batch, n_head, seq_len, head_size)")
+print(f"  Layer 0 の K の形状: {k.shape}  (n_head, seq_len, head_size)")
 print(f"  Layer 0 の V の形状: {v.shape}")
 total_bytes = sum(k.nbytes + v.nbytes for k, v in kv_cache)
-print(f"  全層のキャッシュサイズ: {total_bytes:,} bytes ({total_bytes / 1024:.1f} KB)")
+print(f"  全層のキャッシュサイズ: {total_bytes:,} bytes ({total_bytes / 1024**2:.1f} MB)")
 
 # 5. ステップごとの計算量の違い
 print("\n" + "=" * 50)
