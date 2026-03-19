@@ -1,4 +1,4 @@
-ページ：[00](00_quickstart.md) | [01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | **04** | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：[01](01_quickstart.md) | [02](02_overview.md) | [03](03_tokenizer.md) | [04](04_spiece.md) | **05** | [06](06_layer_norm.md) | [07](07_attention.md) | [08](08_mlp.md) | [09](09_residual.md) | [10](10_output.md) | [11](11_kv_cache.md) | [12](12_architecture.md)
 
 ---
 
@@ -8,22 +8,22 @@ GPT-2 の推論パイプラインの最初のステップは、トークンID（
 
 1. テキスト
    - トークナイザー
-     - [BPE](02_tokenizer.md)
-     - [SentencePiece](03_spiece.md)
+     - [BPE](03_tokenizer.md)
+     - [SentencePiece](04_spiece.md)
 2. トークン ID 列
    - **Embedding** ← この章
 3. ベクトル列
    - Transformer Block × 12
-     - [LayerNorm](05_layer_norm.md)
-     - [Attention](06_attention.md)
-     - [残差接続](08_residual.md)
-     - [LayerNorm](05_layer_norm.md)
-     - [MLP](07_mlp.md)
-     - [残差接続](08_residual.md)
-   - [最終 LayerNorm](08_residual.md)
-   - [LM Head](09_output.md)
+     - [LayerNorm](06_layer_norm.md)
+     - [Attention](07_attention.md)
+     - [残差接続](09_residual.md)
+     - [LayerNorm](06_layer_norm.md)
+     - [MLP](08_mlp.md)
+     - [残差接続](09_residual.md)
+   - [最終 LayerNorm](09_residual.md)
+   - [LM Head](10_output.md)
 4. ロジット
-   - [サンプリング](09_output.md)
+   - [サンプリング](10_output.md)
 5. 次のトークン
 
 ## 1. WTE（Word Token Embedding）: 単語の意味
@@ -111,12 +111,12 @@ WPE 形状: (5, 768)    # 各位置の位置ベクトル
 
 WTE による単語間のコサイン類似度、最近傍探索、ベクトル演算（king − man + woman）に加え、WPE の位置間類似度と埋め込みの合成を確認します。実行結果は本文中で引用しています。
 
-**実行方法**: ([04_embedding.py](04_embedding.py))
+**実行方法**: ([05_embedding.py](05_embedding.py))
 
 ```bash
-uv run docs/04_embedding.py
+uv run docs/05_embedding.py
 ```
 
 ---
 
-ページ：[00](00_quickstart.md) | [01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | **04** | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：[01](01_quickstart.md) | [02](02_overview.md) | [03](03_tokenizer.md) | [04](04_spiece.md) | **05** | [06](06_layer_norm.md) | [07](07_attention.md) | [08](08_mlp.md) | [09](09_residual.md) | [10](10_output.md) | [11](11_kv_cache.md) | [12](12_architecture.md)

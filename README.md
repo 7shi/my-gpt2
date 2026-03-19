@@ -17,23 +17,7 @@
 
 ## 📚 技術解説
 
-`docs/` ディレクトリに、推論パイプラインの処理順序に沿った解説と実験スクリプトがあります。
-
-| ドキュメント | テーマ | 実験 |
-|---|---|---|
-| [README](docs/README.md) | はじめに | |
-| [00_quickstart](docs/00_quickstart.md) | まず動かしてみよう — セットアップと生成体験 | |
-| [01_overview](docs/01_overview.md) | 推論パイプラインの全体像 | [実験](docs/01_overview.py) |
-| [02_tokenizer](docs/02_tokenizer.md) | バイトレベル BPE と Unicode マッピング | |
-| [03_spiece](docs/03_spiece.md) | SentencePiece トークナイザー（ユニグラムモデル） | |
-| [04_embedding](docs/04_embedding.md) | Embedding — トークンIDからベクトルへ | [実験](docs/04_embedding.py) |
-| [05_layer_norm](docs/05_layer_norm.md) | Layer Normalization | [実験](docs/05_layer_norm.py) |
-| [06_attention](docs/06_attention.md) | Attention — 文脈の理解 | [実験](docs/06_attention.py) |
-| [07_mlp](docs/07_mlp.md) | MLP — トークンの特徴変換 | [実験](docs/07_mlp.py) |
-| [08_residual](docs/08_residual.md) | 残差接続と Transformer Block | [実験](docs/08_residual.py) |
-| [09_output](docs/09_output.md) | 出力 — LM Head、Weight Tying、サンプリング | [実験](docs/09_output.py) |
-| [10_kv_cache](docs/10_kv_cache.md) | KV キャッシュ — 自己回帰生成の高速化 | [実験](docs/10_kv_cache.py) |
-| [11_architecture](docs/11_architecture.md) | アーキテクチャ — GPT-2 の設計思想 | |
+[docs/](docs/) ディレクトリに、推論パイプラインの処理順序に沿った解説と実験スクリプトがあります。
 
 ## 🔍 GPT-2 の位置づけ
 

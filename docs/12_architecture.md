@@ -1,4 +1,4 @@
-ページ：[00](00_quickstart.md) | [01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | **11**
+ページ：[01](01_quickstart.md) | [02](02_overview.md) | [03](03_tokenizer.md) | [04](04_spiece.md) | [05](05_embedding.md) | [06](06_layer_norm.md) | [07](07_attention.md) | [08](08_mlp.md) | [09](09_residual.md) | [10](10_output.md) | [11](11_kv_cache.md) | **12**
 
 ---
 
@@ -96,7 +96,7 @@ Attention がトークン間の「横方向」の処理なら、MLP はトーク
 
 ## 4. 12 層の意味
 
-層を経るごとに Embedding とのコサイン類似度は急速に低下します（👉[08](08_residual.md)）。これは各層が異なる抽象度の特徴を担っていることを示唆しています。
+層を経るごとに Embedding とのコサイン類似度は急速に低下します（👉[09](09_residual.md)）。これは各層が異なる抽象度の特徴を担っていることを示唆しています。
 
 一般的に、Transformer の各層は以下のような傾向を持つことが知られています。
 
@@ -121,7 +121,7 @@ x = self.ln_f(x)                  # LM Head の前
 
 ブロック内の LayerNorm は Attention/MLP への入力を正規化し、計算を安定させます。残差ストリーム上の `x` 自体は正規化されず、情報がそのまま保持されます。
 
-最終 LayerNorm（ln_f）は、12層で蓄積されたスケールの増大（👉[08](08_residual.md): 標準偏差 0.22 → 14.2）を出力の前に整える役割です。
+最終 LayerNorm（ln_f）は、12層で蓄積されたスケールの増大（👉[09](09_residual.md): 標準偏差 0.22 → 14.2）を出力の前に整える役割です。
 
 ## 6. GPT-2 から現代の LLM へ
 
@@ -139,10 +139,10 @@ GPT-2 のアーキテクチャは、現代の LLM の基本形です。大規模
 | 活性化関数 | GELU | SwiGLU |
 | Attention | 標準 MHA | GQA / MLA |
 
-Attention の行に注目すると、GQA（Grouped Query Attention）や MLA（Multi-head Latent Attention）は、KV キャッシュ（👉[10](10_kv_cache.md)）のメモリ削減を主な動機としています。標準の MHA (Multi-head Attention) では全ヘッドが独立に K, V を持つため、層数やコンテキスト長の増大に伴いキャッシュが膨大になります。GQA は複数のヘッドで K, V を共有することで、推論時のメモリ使用量を抑えます。
+Attention の行に注目すると、GQA（Grouped Query Attention）や MLA（Multi-head Latent Attention）は、KV キャッシュ（👉[11](11_kv_cache.md)）のメモリ削減を主な動機としています。標準の MHA (Multi-head Attention) では全ヘッドが独立に K, V を持つため、層数やコンテキスト長の増大に伴いキャッシュが膨大になります。GQA は複数のヘッドで K, V を共有することで、推論時のメモリ使用量を抑えます。
 
 構造の違いは効率やスケーラビリティの改善であり、「残差ストリーム上で Attention と MLP を繰り返す」という根本的な設計は共通しています。GPT-2 のコンパクトな実装で理解した原理は、そのまま現代の LLM にも応用できます。
 
 ---
 
-ページ：[00](00_quickstart.md) | [01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | **11**
+ページ：[01](01_quickstart.md) | [02](02_overview.md) | [03](03_tokenizer.md) | [04](04_spiece.md) | [05](05_embedding.md) | [06](06_layer_norm.md) | [07](07_attention.md) | [08](08_mlp.md) | [09](09_residual.md) | [10](10_output.md) | [11](11_kv_cache.md) | **12**

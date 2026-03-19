@@ -1,4 +1,4 @@
-ページ：[00](00_quickstart.md) | [01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | **09** | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：[01](01_quickstart.md) | [02](02_overview.md) | [03](03_tokenizer.md) | [04](04_spiece.md) | [05](05_embedding.md) | [06](06_layer_norm.md) | [07](07_attention.md) | [08](08_mlp.md) | [09](09_residual.md) | **10** | [11](11_kv_cache.md) | [12](12_architecture.md)
 
 ---
 
@@ -8,19 +8,19 @@
 
 1. テキスト
    - トークナイザー
-     - [BPE](02_tokenizer.md)
-     - [SentencePiece](03_spiece.md)
+     - [BPE](03_tokenizer.md)
+     - [SentencePiece](04_spiece.md)
 2. トークン ID 列
-   - [Embedding](04_embedding.md)
+   - [Embedding](05_embedding.md)
 3. ベクトル列
    - Transformer Block × 12
-     - [LayerNorm](05_layer_norm.md)
-     - [Attention](06_attention.md)
-     - [残差接続](08_residual.md)
-     - [LayerNorm](05_layer_norm.md)
-     - [MLP](07_mlp.md)
-     - [残差接続](08_residual.md)
-   - [最終 LayerNorm](08_residual.md)
+     - [LayerNorm](06_layer_norm.md)
+     - [Attention](07_attention.md)
+     - [残差接続](09_residual.md)
+     - [LayerNorm](06_layer_norm.md)
+     - [MLP](08_mlp.md)
+     - [残差接続](09_residual.md)
+   - [最終 LayerNorm](09_residual.md)
    - **LM Head** ← この章
 4. ロジット
    - **サンプリング** ← この章
@@ -46,7 +46,7 @@ return x @ self.wte.T  # → (len(x), 50257)
 
 ## 2. ロジットから確率へ
 
-ロジットは生のスコアであり、負の値や非常に大きな値も含むため、そのままでは確率として扱えません。Softmax（👉[06](06_attention.md)）を適用することで、すべての値が 0〜1 の範囲に収まり、合計が 1 になる確率分布に変換されます。
+ロジットは生のスコアであり、負の値や非常に大きな値も含むため、そのままでは確率として扱えません。Softmax（👉[07](07_attention.md)）を適用することで、すべての値が 0〜1 の範囲に収まり、合計が 1 になる確率分布に変換されます。
 
 ロジットが最も高いトークンに最も高い確率が割り当てられ、スコアの差が大きいほど確率の偏りも大きくなります。
 
@@ -159,18 +159,18 @@ Step 3: 'Artificial Intelligence will be able'
 
 Step 3 では「be able」の後に「to」が来る確率が99%を超えています。文法的なパターンが確定すると、モデルの「迷い」は消え、決定論的な振る舞いになります。
 
-なお、この素朴な実装では毎回全トークンを再計算しています。次回（👉[10](10_kv_cache.md)）説明する KV キャッシュを使えば、新しいトークンの計算だけで済むようになります。
+なお、この素朴な実装では毎回全トークンを再計算しています。次回（👉[11](11_kv_cache.md)）説明する KV キャッシュを使えば、新しいトークンの計算だけで済むようになります。
 
 ## 実験：Temperature と自己回帰生成
 
 Temperature による確率分布の変化、3ステップ分の自己回帰生成の過程、Weight Tying の詳細を確認します。実行結果は本文中で引用しています。
 
-**実行方法**: ([09_output.py](09_output.py))
+**実行方法**: ([10_output.py](10_output.py))
 
 ```bash
-uv run docs/09_output.py
+uv run docs/10_output.py
 ```
 
 ---
 
-ページ：[00](00_quickstart.md) | [01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | **09** | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：[01](01_quickstart.md) | [02](02_overview.md) | [03](03_tokenizer.md) | [04](04_spiece.md) | [05](05_embedding.md) | [06](06_layer_norm.md) | [07](07_attention.md) | [08](08_mlp.md) | [09](09_residual.md) | **10** | [11](11_kv_cache.md) | [12](12_architecture.md)

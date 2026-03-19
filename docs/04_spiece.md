@@ -1,4 +1,4 @@
-ページ：[00](00_quickstart.md) | [01](01_overview.md) | [02](02_tokenizer.md) | **03** | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：[01](01_quickstart.md) | [02](02_overview.md) | [03](03_tokenizer.md) | **04** | [05](05_embedding.md) | [06](06_layer_norm.md) | [07](07_attention.md) | [08](08_mlp.md) | [09](09_residual.md) | [10](10_output.md) | [11](11_kv_cache.md) | [12](12_architecture.md)
 
 ---
 
@@ -8,22 +8,22 @@
 
 1. テキスト
    - トークナイザー
-     - [BPE](02_tokenizer.md)
+     - [BPE](03_tokenizer.md)
      - **SentencePiece** ← この章
 2. トークン ID 列
-   - [Embedding](04_embedding.md)
+   - [Embedding](05_embedding.md)
 3. ベクトル列
    - Transformer Block × 12
-     - [LayerNorm](05_layer_norm.md)
-     - [Attention](06_attention.md)
-     - [残差接続](08_residual.md)
-     - [LayerNorm](05_layer_norm.md)
-     - [MLP](07_mlp.md)
-     - [残差接続](08_residual.md)
-   - [最終 LayerNorm](08_residual.md)
-   - [LM Head](09_output.md)
+     - [LayerNorm](06_layer_norm.md)
+     - [Attention](07_attention.md)
+     - [残差接続](09_residual.md)
+     - [LayerNorm](06_layer_norm.md)
+     - [MLP](08_mlp.md)
+     - [残差接続](09_residual.md)
+   - [最終 LayerNorm](09_residual.md)
+   - [LM Head](10_output.md)
 4. ロジット
-   - [サンプリング](09_output.md)
+   - [サンプリング](10_output.md)
 5. 次のトークン
 
 ## Unigram モデルとは？
@@ -414,10 +414,10 @@ print(t.decode(ids))  # '吾輩は猫である。'
 
 正規化・spiece.model バイナリ上の "日本語" エントリのオフセット検索・Viterbi トレース（各位置での採用/棄却とバックトラック）・encode/decode の一連の流れを確認します。実行結果は本文中で引用しています。
 
-**実行方法**: ([03_spiece.py](03_spiece.py))
+**実行方法**: ([04_spiece.py](04_spiece.py))
 
 ```bash
-uv run docs/03_spiece.py
+uv run docs/04_spiece.py
 ```
 
 ## 付録: .model と .vocab の関係
@@ -464,4 +464,4 @@ uv run model2vocab weights/rinna/japanese-gpt2-small/spiece.model -o vocab.txt
 
 ---
 
-ページ：[00](00_quickstart.md) | [01](01_overview.md) | [02](02_tokenizer.md) | **03** | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：[01](01_quickstart.md) | [02](02_overview.md) | [03](03_tokenizer.md) | **04** | [05](05_embedding.md) | [06](06_layer_norm.md) | [07](07_attention.md) | [08](08_mlp.md) | [09](09_residual.md) | [10](10_output.md) | [11](11_kv_cache.md) | [12](12_architecture.md)

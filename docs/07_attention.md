@@ -1,29 +1,29 @@
-ページ：[00](00_quickstart.md) | [01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | **06** | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：[01](01_quickstart.md) | [02](02_overview.md) | [03](03_tokenizer.md) | [04](04_spiece.md) | [05](05_embedding.md) | [06](06_layer_norm.md) | **07** | [08](08_mlp.md) | [09](09_residual.md) | [10](10_output.md) | [11](11_kv_cache.md) | [12](12_architecture.md)
 
 ---
 
 # Attention: 文脈の理解
 
-Attention は GPT-2 が「文脈」を理解するための最も重要なコンポーネントです。各トークンが他のトークンとの関係性を計算し、文脈を取り込んだベクトルへと自身を更新します。LayerNorm（👉[05](05_layer_norm.md)）を適用した後のベクトルに対して、この処理が行われます。
+Attention は GPT-2 が「文脈」を理解するための最も重要なコンポーネントです。各トークンが他のトークンとの関係性を計算し、文脈を取り込んだベクトルへと自身を更新します。LayerNorm（👉[06](06_layer_norm.md)）を適用した後のベクトルに対して、この処理が行われます。
 
 1. テキスト
    - トークナイザー
-     - [BPE](02_tokenizer.md)
-     - [SentencePiece](03_spiece.md)
+     - [BPE](03_tokenizer.md)
+     - [SentencePiece](04_spiece.md)
 2. トークン ID 列
-   - [Embedding](04_embedding.md)
+   - [Embedding](05_embedding.md)
 3. ベクトル列
    - Transformer Block × 12
-     - [LayerNorm](05_layer_norm.md)
+     - [LayerNorm](06_layer_norm.md)
      - **Attention** ← この章
-     - [残差接続](08_residual.md)
-     - [LayerNorm](05_layer_norm.md)
-     - [MLP](07_mlp.md)
-     - [残差接続](08_residual.md)
-   - [最終 LayerNorm](08_residual.md)
-   - [LM Head](09_output.md)
+     - [残差接続](09_residual.md)
+     - [LayerNorm](06_layer_norm.md)
+     - [MLP](08_mlp.md)
+     - [残差接続](09_residual.md)
+   - [最終 LayerNorm](09_residual.md)
+   - [LM Head](10_output.md)
 4. ロジット
-   - [サンプリング](09_output.md)
+   - [サンプリング](10_output.md)
 5. 次のトークン
 
 ## 1. Attention
@@ -295,12 +295,12 @@ GPT-2 の Attention の処理は以下の流れで進みます。
 
 「The capital of France is」を入力し、因果マスキングの動作確認、注目先の分布、複数ヘッド間の注目パターンの違いを観察します。実行結果は本文中で引用しています。
 
-**実行方法**: ([06_attention.py](06_attention.py))
+**実行方法**: ([07_attention.py](07_attention.py))
 
 ```bash
-uv run docs/06_attention.py
+uv run docs/07_attention.py
 ```
 
 ---
 
-ページ：[00](00_quickstart.md) | [01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | **06** | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：[01](01_quickstart.md) | [02](02_overview.md) | [03](03_tokenizer.md) | [04](04_spiece.md) | [05](05_embedding.md) | [06](06_layer_norm.md) | **07** | [08](08_mlp.md) | [09](09_residual.md) | [10](10_output.md) | [11](11_kv_cache.md) | [12](12_architecture.md)

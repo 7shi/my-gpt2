@@ -1,4 +1,4 @@
-ページ：**00** | [01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：**01** | [02](02_overview.md) | [03](03_tokenizer.md) | [04](04_spiece.md) | [05](05_embedding.md) | [06](06_layer_norm.md) | [07](07_attention.md) | [08](08_mlp.md) | [09](09_residual.md) | [10](10_output.md) | [11](11_kv_cache.md) | [12](12_architecture.md)
 
 ---
 
@@ -137,4 +137,4 @@ uv run my-gpt2 -n 50 -t 0.8 -m rinna/japanese-gpt2-small "昔々あるところ�
 
 ---
 
-ページ：**00** | [01](01_overview.md) | [02](02_tokenizer.md) | [03](03_spiece.md) | [04](04_embedding.md) | [05](05_layer_norm.md) | [06](06_attention.md) | [07](07_mlp.md) | [08](08_residual.md) | [09](09_output.md) | [10](10_kv_cache.md) | [11](11_architecture.md)
+ページ：**01** | [02](02_overview.md) | [03](03_tokenizer.md) | [04](04_spiece.md) | [05](05_embedding.md) | [06](06_layer_norm.md) | [07](07_attention.md) | [08](08_mlp.md) | [09](09_residual.md) | [10](10_output.md) | [11](11_kv_cache.md) | [12](12_architecture.md)
