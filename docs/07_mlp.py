@@ -1,9 +1,19 @@
 import numpy as np
+import unicodedata
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
 from my_gpt2.model import gelu
 import os
 import sys
+
+def display_width(s):
+    """東アジア文字（全角）を2カラム、それ以外を1カラムとして文字列の表示幅を返す。"""
+    return sum(2 if unicodedata.east_asian_width(c) in ('W', 'F') else 1 for c in s)
+
+def center_w(s, w):
+    pad = max(0, w - display_width(s))
+    left = pad // 2
+    return ' ' * left + s + ' ' * (pad - left)
 
 def cosine_similarity(v1, v2):
     return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
@@ -33,6 +43,15 @@ x_ln2 = block.ln_2(x_after_attn)
 print(f"\n入力: '{text}'")
 print(f"トークン: {tokens}")
 
+# GELU の入出力例
+print("\n" + "=" * 50)
+print("GELU の入出力例")
+cols_gelu = [("入力", 6), ("GELU 出力", 10)]
+print("| " + " | ".join(center_w(h, w) for h, w in cols_gelu) + " |")
+print("|" + "|".join("-" * (w + 2) for _, w in cols_gelu) + "|")
+for val in [-2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0]:
+    print(f"| {val:>6.1f} | {gelu(np.array(val)):>10.4f} |")
+
 # 1. MLP の次元変化
 print("\n" + "=" * 50)
 print("1. MLP の次元変化: 768 → 3072 → 768")
@@ -44,25 +63,26 @@ activated = gelu(intermediate)
 output = activated @ block.mlp.w_proj + block.mlp.b_proj
 print(f"  出力:   {output.shape}  （768次元に戻る）")
 
-# 2. GELU 活性化の効果
-print("\n" + "=" * 50)
-print("2. GELU 活性化の効果（中間層 3072 次元）")
-total = intermediate.size
-near_zero = np.sum(np.abs(activated) < 0.1)
-negative_input = np.sum(intermediate < 0)
-suppressed = np.sum((intermediate < 0) & (np.abs(activated) < 0.01))
-print(f"  中間層の要素数: {total}")
-print(f"  負の入力: {negative_input} ({100*negative_input/total:.1f}%)")
-print(f"  GELU で抑制（|出力| < 0.01）: {suppressed} ({100*suppressed/total:.1f}%)")
-print(f"  活性化後にほぼゼロ（|出力| < 0.1）: {near_zero} ({100*near_zero/total:.1f}%)")
+n_dim = intermediate.shape[1]
+cols1 = [("トークン", 12), ("正の成分", 9), ("負の成分", 9)]
+print("| " + " | ".join(center_w(h, w) for h, w in cols1) + " |")
+print("|" + "|".join("-" * (w + 2) for _, w in cols1) + "|")
+for i, token in enumerate(tokens):
+    pos = np.sum(intermediate[i] > 0)
+    neg = np.sum(intermediate[i] < 0)
+    token_s = f"`{token!r}`"
+    print(f"| {token_s:12} | {pos:>4d}/{n_dim} | {neg:>4d}/{n_dim} |")
 
-# 3. MLP 前後のベクトル変化
+# 2. MLP 前後のベクトル変化
 print("\n" + "=" * 50)
-print("3. MLP 前後のベクトル変化")
+print("2. MLP 前後のベクトル変化")
 x_mlp = block.mlp(x_ln2)
-print(f"  {'トークン':>12}  {'入力std':>8}  {'出力std':>8}  {'コサイン類似度':>14}")
+cols3 = [("トークン", 12), ("入力std", 8), ("出力std", 8), ("コサイン類似度", 14)]
+print("| " + " | ".join(center_w(h, w) for h, w in cols3) + " |")
+print("|" + "|".join("-" * (w + 2) for _, w in cols3) + "|")
 for i, tok in enumerate(tokens):
     v_in = x_ln2[i]
     v_out = x_mlp[i]
     sim = cosine_similarity(v_in, v_out)
-    print(f"  {tok:>12}  {np.std(v_in):8.4f}  {np.std(v_out):8.4f}  {sim:14.4f}")
+    tok_s = f"`{tok!r}`"
+    print(f"| {tok_s:12} | {np.std(v_in):8.4f} | {np.std(v_out):8.4f} | {sim:14.4f} |")
