@@ -8,6 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Model weights
 weights/
-weights/vocab.json
-weights/merges.txt
