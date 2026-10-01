@@ -26,16 +26,17 @@ Jupyter Notebook も 2 つあります。
 - [abridged.ipynb](abridged.ipynb): 簡約版の記事「[【簡約版】GPT-2 推論エンジン入門](https://zenn.dev/7shi/articles/20260330-gpt2-inference)」を、セクションごとのテキストとコードに分けて Notebook にしたものです。記事のコードに、動作を確かめるための最小限のコードを添えてあり、上から順に実行できます（PyTorch は不要です）。
 - [walkthrough.ipynb](walkthrough.ipynb): 推論パイプラインを順に動かして確認できる Notebook です（PyTorch 版を使用）。解説は簡約版の記事を参照してください。
 
-uv の場合は、依存グループ `notebook`（JupyterLab）を指定して起動します。
+uv の場合は、依存グループ `notebook`（JupyterLab、matplotlib）を指定して起動します。
 
 ```bash
 uv run --group notebook jupyter lab abridged.ipynb
 uv run --group notebook --extra torch jupyter lab walkthrough.ipynb
 ```
 
-pip の場合は、JupyterLab を別途インストールします。
+pip の場合は、JupyterLab を別途インストールします。`abridged.ipynb` ではグラフの描画に matplotlib も使います。
 
 ```bash
+pip install . jupyterlab matplotlib && jupyter lab abridged.ipynb
 pip install ".[torch]" jupyterlab && jupyter lab walkthrough.ipynb
 ```
 

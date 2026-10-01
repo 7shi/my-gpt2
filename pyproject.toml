@@ -20,6 +20,7 @@ dev = [
 ]
 notebook = [
     "jupyterlab>=4.0.0",
+    "matplotlib>=3.11.2",
 ]
 
 [build-system]
