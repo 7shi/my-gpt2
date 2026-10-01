@@ -21,9 +21,10 @@ docs ディレクトリに、推論パイプラインの処理順序に沿った
 
 - [docs/README.md](docs/README.md)
 
-推論パイプラインを順に動かして確認できる Jupyter Notebook もあります（PyTorch 版を使用）。解説は [記事](https://zenn.dev/7shi/articles/20260330-gpt2-inference) を参照してください。
+Jupyter Notebook も 2 つあります。
 
-- [walkthrough.ipynb](walkthrough.ipynb)
+- [abridged.ipynb](abridged.ipynb): 簡約版の記事「[【簡約版】GPT-2 推論エンジン入門](https://zenn.dev/7shi/articles/20260330-gpt2-inference)」を、セクションごとのテキストとコードに分けて Notebook にしたものです。読むための Notebook で、コードは記事中の断片のため、そのままでは実行できません。
+- [walkthrough.ipynb](walkthrough.ipynb): 推論パイプラインを順に動かして確認できる Notebook です（PyTorch 版を使用）。解説は簡約版の記事を参照してください。
 
 ```bash
 pip install ".[torch]" jupyterlab && jupyter lab walkthrough.ipynb
@@ -57,6 +58,7 @@ my-gpt2/
 │       └── japanese-gpt2-small/   # make download-rinna で生成
 ├── docs/             # 技術解説ドキュメント (.md) と実験スクリプト (.py)
 ├── tests/            # ユニットテスト
+├── abridged.ipynb    # 簡約版の記事を Notebook にしたもの（コードは断片で実行不可）
 ├── walkthrough.ipynb # 推論パイプラインを順に動かして確認するノートブック（PyTorch 版）
 ├── Makefile          # セットアップと実行の自動化
 └── pyproject.toml    # プロジェクト設定 (hatchling)
