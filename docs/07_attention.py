@@ -57,6 +57,21 @@ print(f"\n入力: '{text}'")
 print(f"トークン: {tokens}")
 print(f"トークン数: {len(tokens)}")
 
+# 0. Q・K・V の人工例
+print("\n" + "=" * 50)
+print("0. Q・K・V の人工例（軸: [動物, 地名, 動作]）")
+toy_tokens = ["cat", "Paris", "run"]
+# K（見出し）: 該当する軸だけ 1
+toy_k = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=np.float32)
+# V（中身）: 意味のない任意の数値
+toy_v = np.array([[10, 0], [0, 20], [5, 5]], dtype=np.float32)
+for query in [[3, 0, 0], [0, 3, 0], [3, 0, 3]]:
+    toy_scores = toy_k @ np.array(query, dtype=np.float32)  # Q と K の内積
+    toy_weights = softmax(toy_scores)                       # 注目度（合計 1）
+    toy_result = toy_weights @ toy_v                        # 注目度で V を混ぜる
+    weights_s = ", ".join(f"{t}: {w:.2f}" for t, w in zip(toy_tokens, toy_weights))
+    print(f"  Q = {query}: 注目度 {{{weights_s}}} -> 取り出された情報 [{toy_result[0]:.1f}, {toy_result[1]:.1f}]")
+
 # 1. 注目度行列（Head 0）をテーブル出力
 print("\n" + "=" * 50)
 print("1. 注目度行列（Head 0）")
@@ -108,3 +123,11 @@ for head in range(min(4, n_head)):
     top3 = np.argsort(p_head)[::-1][:3]
     items = ", ".join(f"{tokens[i]!r}({p_head[i]:.3f})" for i in top3)
     print(f"  Head {head}: {items}")
+
+# 4. 全ヘッドの注目先（最後のトークンが最も注目するトークン）
+print("\n" + "=" * 50)
+print(f"4. 全ヘッドの注目先（最後のトークン {tokens[-1]!r} が最も注目するトークン）")
+for head in range(n_head):
+    p_head = probs[0, head, target_idx]
+    top = int(np.argmax(p_head))
+    print(f"  Head {head:2d}: {tokens[top]!r:>10} ({p_head[top]:.2f})")
