@@ -21,6 +21,16 @@ docs ディレクトリに、推論パイプラインの処理順序に沿った
 
 - [docs/README.md](docs/README.md)
 
+推論パイプラインを順に動かして確認できる Jupyter Notebook もあります（PyTorch 版を使用）。解説は [記事](https://zenn.dev/7shi/articles/20260330-gpt2-inference) を参照してください。
+
+- [walkthrough.ipynb](walkthrough.ipynb)
+
+```bash
+pip install ".[torch]" jupyterlab && jupyter lab walkthrough.ipynb
+# uv の場合
+uv run --extra torch --with jupyterlab jupyter lab walkthrough.ipynb
+```
+
 ## 🔍 GPT-2 の位置づけ
 
 GPT-2（124M パラメータ）の生成結果を見ると、文法的な整合性はあるものの意味の一貫性は低く、実用には程遠い印象を受けます。しかしそれは問題ではなく、むしろ GPT-2 はその「途中段階」を記録した歴史的なモデルです。
@@ -39,6 +49,7 @@ my-gpt2/
 │   ├── spiece.py     # 自作 SentencePiece トークナイザー（rinna 向け）
 │   ├── loader.py     # 重みロードとマッピング
 │   └── generate.py   # 文章生成実行スクリプト
+├── my_gpt2_torch/    # PyTorch 版（構成は my_gpt2/ と同じ、torch extras が必要）
 ├── weights/
 │   ├── openai-community/
 │   │   └── gpt2/                  # make download-gpt2 で生成
@@ -46,6 +57,7 @@ my-gpt2/
 │       └── japanese-gpt2-small/   # make download-rinna で生成
 ├── docs/             # 技術解説ドキュメント (.md) と実験スクリプト (.py)
 ├── tests/            # ユニットテスト
+├── walkthrough.ipynb # 推論パイプラインを順に動かして確認するノートブック（PyTorch 版）
 ├── Makefile          # セットアップと実行の自動化
 └── pyproject.toml    # プロジェクト設定 (hatchling)
 ```
@@ -60,6 +72,14 @@ git clone https://github.com/7shi/my-gpt2.git
 cd my-gpt2
 uv sync
 ```
+
+用途に応じたインストール方法は次のとおりです。PyTorch 版は extras（`torch`）として提供しており、指定したときだけ PyTorch がインストールされます（詳細は [PyTorch 版](#-pytorch-版)）。
+
+| 目的 | コマンド |
+|---|---|
+| NumPy 版のみ | `pip install .` |
+| PyTorch 版も使う | `pip install ".[torch]"` |
+| uv の場合 | `uv sync --extra torch` |
 
 ### 2. 重みと語彙ファイルのダウンロード
 公式の GPT-2 重み (`model.safetensors`) とトークナイザー用ファイルをダウンロードします。
@@ -102,6 +122,17 @@ uv run my-gpt2 -n 20 -m rinna/japanese-gpt2-small "吾輩は猫で"
 - `-m`, `--model`: モデルID（デフォルト: `openai-community/gpt2`、例: `rinna/japanese-gpt2-small`）。
 - `-r`, `--repeat`: 同じプロンプトを繰り返す回数（デフォルト: 1）。サンプリングのばらつきを確認するのに便利です。
 - `-s`, `--seed`: 乱数シード（デフォルト: なし）。指定すると生成結果を再現できます。
+- `-w`, `--weights_dir`: 重みの置き場所（デフォルト: `weights`）。`<weights_dir>/<model_id>/` 以下のファイルを読み込みます。
+
+Python から使う場合は、`Tokenizer`・`SentencePieceTokenizer`・`load_gpt2_weights`・`generate` が同名の引数 `weights_dir` を受け付けます。
+
+```python
+from my_gpt2.tokenizer import Tokenizer
+from my_gpt2.loader import load_gpt2_weights
+
+tokenizer = Tokenizer(weights_dir="/path/to/weights")
+model = load_gpt2_weights(weights_dir="/path/to/weights")
+```
 
 ## 🧪 テスト
 各モジュールの正当性を確認するためにテストを実行できます。
@@ -171,23 +202,43 @@ uv run my-gpt2 -n 50 -t 0.8 -m rinna/japanese-gpt2-small "昔々あるところ�
 
 ## ⚡ PyTorch 版
 
-`my_gpt2_torch/` に PyTorch を使った実装があります。NumPy 版とロジック・構造は同一ですが、PyTorch の最適化された演算カーネルにより **約7.5倍高速** に動作します（CPU 同士の比較）。
+`my_gpt2_torch/` に PyTorch を使った実装があります。NumPy 版とロジック・構造は同一ですが、PyTorch の最適化された演算カーネルにより、CPU 同士の比較で **約10倍高速** に動作します（[実行時間の比較](#実行時間の比較)）。
 
 tokenizer と SentencePiece トークナイザーは NumPy に依存しないため、`my_gpt2/` のものをそのまま再利用しています。
 
 ### 実行方法
 
-PyTorch の依存関係は PEP 723 インラインスクリプトメタデータで宣言されているため、`pyproject.toml` の変更なしに `uv run` で直接実行できます。初回実行時に PyTorch が自動でインストールされます。
+[環境構築](#1-環境構築)の表のとおり、`pip install ".[torch]"`（uv の場合は `uv sync --extra torch`）でインストールすると、`my-gpt2-torch` コマンドが使えます。
 
 ```bash
-uv run my_gpt2_torch/generate.py "Once upon a time"
+uv run my-gpt2-torch "Once upon a time"
 ```
 
 オプションは NumPy 版と同じです。
 
 ```bash
-uv run my_gpt2_torch/generate.py -n 50 -t 0.8 -m rinna/japanese-gpt2-small "昔々あるところに"
+uv run my-gpt2-torch -n 50 -t 0.8 -m rinna/japanese-gpt2-small "昔々あるところに"
 ```
+
+extras を指定しない `pip install .` / `uv sync` でも `my-gpt2-torch` コマンドは入りますが、PyTorch が無いため実行時に `ModuleNotFoundError` になります。
+
+### 実行時間の比較
+
+同じプロンプトを貪欲法（`-t 0`）で生成し、プロセス起動から終了までの時間（重みのロードを含む）を `time` で測定しました。3 回の中央値です。
+
+```bash
+my-gpt2       -n 100 -t 0 "Once upon a time"
+my-gpt2-torch -n 100 -t 0 "Once upon a time"
+```
+
+| 生成トークン数 | NumPy 版 | PyTorch 版 | 比 |
+|---:|---:|---:|---:|
+| 1 | 2.6 秒 | 2.3 秒 | 1.1 倍 |
+| 100 | 97 秒 | 8.9 秒 | 10.9 倍 |
+
+`-n 1` はほぼ起動と重みのロードにかかる時間です。差は生成するトークン数に応じて広がります。
+
+測定環境: AMD Ryzen 5 3400G（4 コア 8 スレッド、GPU 未使用）、WSL2、Python 3.13、NumPy 2.5.3、PyTorch 2.14.1（スレッド数 4）。結果は環境によって変わります。
 
 ### NumPy 版との使い分け
 

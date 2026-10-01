@@ -6,16 +6,16 @@ from .spiece import SentencePieceTokenizer
 from .loader import load_gpt2_weights
 from .model import softmax
 
-def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p=None, model_id="openai-community/gpt2", verbose=False, *, model=None, tokenizer=None):
+def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p=None, model_id="openai-community/gpt2", verbose=False, *, model=None, tokenizer=None, weights_dir="weights"):
     # 1. トークナイザーと重みを読み込む（未指定時）
     if tokenizer is None:
-        spiece_path = f"weights/{model_id}/spiece.model"
+        spiece_path = f"{weights_dir}/{model_id}/spiece.model"
         if os.path.exists(spiece_path):
-            tokenizer = SentencePieceTokenizer(model_id)
+            tokenizer = SentencePieceTokenizer(model_id, weights_dir)
         else:
-            tokenizer = Tokenizer(model_id)
+            tokenizer = Tokenizer(model_id, weights_dir)
     if model is None:
-        model = load_gpt2_weights(model_id, verbose=verbose)
+        model = load_gpt2_weights(model_id, verbose=verbose, weights_dir=weights_dir)
 
     # 2. 入力をトークン化
     input_ids = tokenizer.encode(prompt)
@@ -136,6 +136,7 @@ def main():
     parser.add_argument("-m", "--model", default="openai-community/gpt2", help="モデルID（例: openai-community/gpt2）")
     parser.add_argument("-r", "--repeat", type=int, default=1, help="同じプロンプトを繰り返す回数")
     parser.add_argument("-s", "--seed", type=int, default=None, help="乱数シード（再現性のため）")
+    parser.add_argument("-w", "--weights_dir", default="weights", help="重みの置き場所（model_id のサブディレクトリを含む親ディレクトリ）")
     parser.add_argument("-v", "--verbose", action="store_true", help="詳細な情報を表示する")
 
     args = parser.parse_args()
@@ -144,16 +145,16 @@ def main():
         np.random.seed(args.seed)
 
     # モデルとトークナイザーを一度だけ読み込む
-    spiece_path = f"weights/{args.model}/spiece.model"
+    spiece_path = f"{args.weights_dir}/{args.model}/spiece.model"
     if os.path.exists(spiece_path):
-        tokenizer = SentencePieceTokenizer(args.model)
+        tokenizer = SentencePieceTokenizer(args.model, args.weights_dir)
     else:
-        tokenizer = Tokenizer(args.model)
-    model = load_gpt2_weights(args.model, verbose=args.verbose)
+        tokenizer = Tokenizer(args.model, args.weights_dir)
+    model = load_gpt2_weights(args.model, verbose=args.verbose, weights_dir=args.weights_dir)
 
     for prompt_text in args.prompt:
         for _ in range(args.repeat):
-            output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, top_k=args.top_k, top_p=args.top_p, model_id=args.model, verbose=args.verbose, model=model, tokenizer=tokenizer)
+            output = generate(prompt_text, n_tokens_to_generate=args.n_tokens, temperature=args.temperature, top_k=args.top_k, top_p=args.top_p, model_id=args.model, verbose=args.verbose, model=model, tokenizer=tokenizer, weights_dir=args.weights_dir)
             if args.verbose:
                 print(output)
 

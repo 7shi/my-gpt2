@@ -101,8 +101,8 @@ def main():
 
 
 class SentencePieceTokenizer:
-    def __init__(self, model_id="rinna/japanese-gpt2-small"):
-        path = f"weights/{model_id}/spiece.model"
+    def __init__(self, model_id="rinna/japanese-gpt2-small", weights_dir="weights"):
+        path = f"{weights_dir}/{model_id}/spiece.model"
         vocab, self._normalizer = _load_vocab(path)
         self._id_to_piece = [piece for piece, score, ptype in vocab]
         self._piece_to_id = {piece: i for i, (piece, score, ptype) in enumerate(vocab)}

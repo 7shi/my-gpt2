@@ -11,6 +11,9 @@ dependencies = [
     "safetensors>=0.7.0",
 ]
 
+[project.optional-dependencies]
+torch = ["torch>=2.0.0"]
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
@@ -23,6 +26,7 @@ build-backend = "hatchling.build"
 [project.scripts]
 my-gpt2 = "my_gpt2.generate:main"
 model2vocab = "my_gpt2.spiece:main"
+my-gpt2-torch = "my_gpt2_torch.generate:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["my_gpt2"]
+packages = ["my_gpt2", "my_gpt2_torch"]
