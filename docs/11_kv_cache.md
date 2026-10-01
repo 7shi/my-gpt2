@@ -70,7 +70,7 @@ qkv = x @ self.w_qkv + self.b_qkv
 q, k, v = np.split(qkv, 3, axis=-1)
 
 # Q × K^T → Softmax → × V
-scores = q @ k.transpose(0, 2, 1) / np.sqrt(d_k)
+scores = q @ k.transpose(0, 2, 1) / math.sqrt(d_k)
 probs = softmax(scores)
 out = probs @ v
 ```

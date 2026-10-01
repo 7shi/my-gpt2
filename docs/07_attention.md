@@ -91,10 +91,22 @@ class Attention:
 # q: (head, seq_len, d_k), k: (head, seq_len, d_k)
 # transpose で k の最後の2軸を入れ替え → (head, d_k, seq_len)
 # q @ k^T: (head, seq_len, seq_len) → ヘッドごとに全トークン間のスコア行列
-scores = q @ k.transpose(0, 2, 1) / np.sqrt(d_k)
+scores = q @ k.transpose(0, 2, 1) / math.sqrt(d_k)
 ```
 
 `@` 演算子は最後の 2 軸で行列積を計算し、先頭の軸（head）は独立した行列積のインデックスです。ここでの `q @ k^T` は線形変換ではなく、各トークンのベクトル同士の内積を総当たりで一括計算しています。結果は変換されたベクトルではなく、スカラー値（スコア）の表になります。つまり全ヘッドのスコア行列を一括計算しています。
+
+### 実装上の注意：`np.sqrt` ではなく `math.sqrt`
+
+$\sqrt{d_k}$ の計算に `np.sqrt(d_k)` を使うと、速度が大きく落ちます。NumPy 2 では `np.sqrt` が `np.float64` 型のスカラーを返し、float32 の配列をそれで割ると、結果の配列が **float64 に格上げ**されるためです。格上げされた配列は以降の行列積もすべて float64 で行われ、float32 の重みとの演算では重みが毎回変換されます。
+
+```python
+x = np.ones(3, dtype=np.float32)
+print((x / np.sqrt(64)).dtype)    # float64（np.float64 スカラーで割ると格上げされる）
+print((x / math.sqrt(64)).dtype)  # float32（Python の float なら dtype は変わらない）
+```
+
+このリポジトリでは、Attention のスケーリングと GELU（👉[08](08_mlp.md)）の 2 か所を `math.sqrt` に変えただけで、100 トークンの生成が約 97 秒から約 30 秒（Ryzen 5 3400G、CPU）になりました。ロジットも float32 のままになります。NumPy 版と PyTorch 版の差が約 3 倍まで縮まったことからも、「遅いのはライブラリのせい」と決めつけず、dtype を確認する価値があります。
 
 ## 4. Softmax
 

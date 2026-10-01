@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from my_gpt2.tokenizer import Tokenizer
 from my_gpt2.loader import load_gpt2_weights
@@ -16,7 +17,7 @@ def mha_attention(x, w_qkv, b_qkv, n_head):
     k = k.reshape(batch_size, seq_len, n_head, d_k).transpose(0, 2, 1, 3)
     v = v.reshape(batch_size, seq_len, n_head, d_k).transpose(0, 2, 1, 3)
 
-    scores = q @ k.transpose(0, 1, 3, 2) / np.sqrt(d_k)
+    scores = q @ k.transpose(0, 1, 3, 2) / math.sqrt(d_k)
 
     # 因果マスキング
     mask = np.tril(np.ones((seq_len, seq_len)))

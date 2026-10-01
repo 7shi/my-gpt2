@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from dataclasses import dataclass
 
@@ -126,7 +127,7 @@ def gelu(x):
     GELU（Gaussian Error Linear Unit）活性化関数。
     元のGPT-2実装で使われている近似式を使用。
     """
-    return 0.5 * x * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * np.power(x, 3))))
+    return 0.5 * x * (1 + np.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * np.power(x, 3))))
 
 def softmax(x):
     """
@@ -145,7 +146,7 @@ def attention(q, k, v, mask=None):
     mask: 因果マスク (seq_len, seq_len)
     """
     d_k = q.shape[-1]
-    scores = q @ k.transpose(0, 2, 1) / np.sqrt(d_k)
+    scores = q @ k.transpose(0, 2, 1) / math.sqrt(d_k)
 
     if mask is not None:
         scores = np.where(mask == 0, -1e10, scores)

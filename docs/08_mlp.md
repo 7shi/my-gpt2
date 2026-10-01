@@ -108,8 +108,10 @@ $$
 
 ```python
 def gelu(x):
-    return 0.5 * x * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x ** 3)))
+    return 0.5 * x * (1 + np.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * x ** 3)))
 ```
+
+定数 $\sqrt{2/\pi}$ は `np.sqrt` ではなく `math.sqrt` で計算しています。`np.sqrt` が返す `np.float64` のスカラーを掛けると、float32 の配列が float64 に格上げされて遅くなるためです（詳細は 👉[07](07_attention.md)）。
 
 ReLU と同様に、正の値はほぼそのまま通過し、負の値は大きく抑制されます。ReLU との違いは境界付近が滑らかに遷移することで、学習時の勾配が安定しやすくなります。
 
