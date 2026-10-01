@@ -18,6 +18,9 @@ torch = ["torch>=2.0.0"]
 dev = [
     "pytest>=9.0.2",
 ]
+notebook = [
+    "jupyterlab>=4.0.0",
+]
 
 [build-system]
 requires = ["hatchling"]
