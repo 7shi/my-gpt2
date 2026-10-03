@@ -6,7 +6,7 @@ readme = "README.md"
 repository = "https://github.com/7shi/my-gpt2"
 requires-python = ">=3.13"
 dependencies = [
-    "numpy>=2.4.3",
+    "numpy",
     "regex>=2024.0.0",
     "safetensors>=0.7.0",
 ]

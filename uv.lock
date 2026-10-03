@@ -1287,7 +1287,7 @@ notebook = [
 
 [package.metadata]
 requires-dist = [
-    { name = "numpy", specifier = ">=2.4.3" },
+    { name = "numpy" },
     { name = "regex", specifier = ">=2024.0.0" },
     { name = "safetensors", specifier = ">=0.7.0" },
     { name = "torch", marker = "extra == 'torch'", specifier = ">=2.0.0" },
