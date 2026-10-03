@@ -1,3 +1,4 @@
+import my_gpt2
 import json
 import re
 from functools import lru_cache
@@ -30,7 +31,9 @@ def get_pairs(word):
     return pairs
 
 class Tokenizer:
-    def __init__(self, model_id="openai-community/gpt2", weights_dir="weights"):
+    def __init__(self, model_id="openai-community/gpt2", weights_dir=None):
+        if weights_dir is None:
+            weights_dir = my_gpt2.WEIGHTS_DIR
         vocab_path = f"{weights_dir}/{model_id}/vocab.json"
         merges_path = f"{weights_dir}/{model_id}/merges.txt"
         with open(vocab_path, "r", encoding="utf-8") as f:

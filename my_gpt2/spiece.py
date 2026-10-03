@@ -1,3 +1,4 @@
+import my_gpt2
 import math
 import struct
 import unicodedata
@@ -101,7 +102,9 @@ def main():
 
 
 class SentencePieceTokenizer:
-    def __init__(self, model_id="rinna/japanese-gpt2-small", weights_dir="weights"):
+    def __init__(self, model_id="rinna/japanese-gpt2-small", weights_dir=None):
+        if weights_dir is None:
+            weights_dir = my_gpt2.WEIGHTS_DIR
         path = f"{weights_dir}/{model_id}/spiece.model"
         vocab, self._normalizer = _load_vocab(path)
         self._id_to_piece = [piece for piece, score, ptype in vocab]

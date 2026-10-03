@@ -1,13 +1,16 @@
+import my_gpt2
 import json
 from safetensors.numpy import load_file
 from my_gpt2.model import LayerNorm, Attention, MLP, TransformerBlock, GPT2
 
-def load_gpt2_weights(model_id="openai-community/gpt2", verbose=False, weights_dir="weights"):
+def load_gpt2_weights(model_id="openai-community/gpt2", verbose=False, weights_dir=None):
     """
     GPT-2のsafetensorsを読み込み、GPT2に組み立てて返す。
     事前に `make download` を実行して重みファイルを取得してください。
     weights_dir は重みの置き場所（model_id のサブディレクトリを含む親ディレクトリ）。
     """
+    if weights_dir is None:
+        weights_dir = my_gpt2.WEIGHTS_DIR
     model_dir = f"{weights_dir}/{model_id}"
     file_path = f"{model_dir}/model.safetensors"
 

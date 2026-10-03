@@ -1,3 +1,4 @@
+import my_gpt2
 import os
 import torch
 import argparse
@@ -7,7 +8,10 @@ from my_gpt2.spiece import SentencePieceTokenizer
 from .loader import load_gpt2_weights
 from .model import softmax
 
-def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p=None, model_id="openai-community/gpt2", verbose=False, *, model=None, tokenizer=None, weights_dir="weights"):
+def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p=None, model_id="openai-community/gpt2", verbose=False, *, model=None, tokenizer=None, weights_dir=None):
+    if weights_dir is None:
+        weights_dir = my_gpt2.WEIGHTS_DIR
+
     # 1. トークナイザーと重みを読み込む（未指定時）
     if tokenizer is None:
         spiece_path = f"{weights_dir}/{model_id}/spiece.model"
@@ -138,13 +142,16 @@ def main():
     parser.add_argument("-m", "--model", default="openai-community/gpt2", help="モデルID（例: openai-community/gpt2）")
     parser.add_argument("-r", "--repeat", type=int, default=1, help="同じプロンプトを繰り返す回数")
     parser.add_argument("-s", "--seed", type=int, default=None, help="乱数シード（再現性のため）")
-    parser.add_argument("-w", "--weights_dir", default="weights", help="重みの置き場所（model_id のサブディレクトリを含む親ディレクトリ）")
+    parser.add_argument("-w", "--weights_dir", default=None, help="重みの置き場所（model_id のサブディレクトリを含む親ディレクトリ）。省略時は my_gpt2.WEIGHTS_DIR")
     parser.add_argument("-v", "--verbose", action="store_true", help="詳細な情報を表示する")
 
     args = parser.parse_args()
 
     if args.seed is not None:
         torch.manual_seed(args.seed)
+
+    if args.weights_dir is None:
+        args.weights_dir = my_gpt2.WEIGHTS_DIR
 
     # モデルとトークナイザーを一度だけ読み込む
     spiece_path = f"{args.weights_dir}/{args.model}/spiece.model"
