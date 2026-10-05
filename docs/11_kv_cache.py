@@ -48,7 +48,7 @@ logits, kv_cache = model(inputs, kv_cache=None)
 next_token = int(np.argmax(logits[-1, :]))
 ids_cached.append(next_token)
 
-# Incremental
+# Decode
 for step in range(n_steps - 1):
     inputs = np.array([ids_cached[-1]])
     logits, kv_cache = model(inputs, kv_cache=kv_cache)

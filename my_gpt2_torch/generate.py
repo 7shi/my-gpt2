@@ -42,7 +42,7 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p
             # Prefill: 全プロンプトを処理してキャッシュを構築
             inputs = torch.tensor(input_ids[-1024:], dtype=torch.long)
         else:
-            # Incremental: 新トークンのみ処理
+            # Decode: 新トークンのみ処理
             inputs = torch.tensor([input_ids[-1]], dtype=torch.long)
 
         # 順伝播（KV キャッシュ付き）

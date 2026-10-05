@@ -46,7 +46,7 @@ logits, kv_cache = model(np.array(input_ids), kv_cache=None)
 next_token = int(np.argmax(logits[-1, :]))
 input_ids.append(next_token)
 
-# Incremental: 新トークンのみ処理
+# Decode: 新トークンのみ処理
 for _ in range(n_tokens_to_generate - 1):
     new_token_id = np.array([input_ids[-1]])
     logits, kv_cache = model(new_token_id, kv_cache=kv_cache)
@@ -128,9 +128,9 @@ kv_len = k.shape[2]
 mask = np.tril(np.ones((kv_len, kv_len)))[-seq_len:]
 ```
 
-`seq_len` は今回処理するトークン数です。prefill 時はプロンプト全体（例: 4）、incremental 時は 1 になります。このコードは両方を統一的に扱います。
+`seq_len` は今回処理するトークン数です。prefill 時はプロンプト全体（例: 4）、decode 時は 1 になります。このコードは両方を統一的に扱います。
 
-マスクの `[-seq_len:]` がポイントです。因果マスク（kv_len × kv_len の下三角行列）から最後の `seq_len` 行を取り出すことで、今回のトークンが過去のトークンを参照できるようにします。prefill 時（キャッシュなし）は `seq_len == kv_len` なので通常の因果マスクと同じで、incremental 時は最後の 1 行だけになります。
+マスクの `[-seq_len:]` がポイントです。因果マスク（kv_len × kv_len の下三角行列）から最後の `seq_len` 行を取り出すことで、今回のトークンが過去のトークンを参照できるようにします。prefill 時（キャッシュなし）は `seq_len == kv_len` なので通常の因果マスクと同じで、decode 時は最後の 1 行だけになります。
 
 ### TransformerBlock: キャッシュの受け渡し
 

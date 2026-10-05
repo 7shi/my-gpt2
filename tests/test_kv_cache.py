@@ -41,7 +41,7 @@ def test_kv_cache_equivalence():
     # キャッシュなし
     logits_no_cache = model(input_ids)
 
-    # Prefill + 1 step incremental
+    # Prefill + 1 step decode
     prefill_ids = np.array([10, 20, 30, 40])
     _, kv_cache = model(prefill_ids, kv_cache=None)
     last_id = np.array([50])

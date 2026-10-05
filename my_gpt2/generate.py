@@ -41,7 +41,7 @@ def generate(prompt, n_tokens_to_generate=30, temperature=1.0, top_k=None, top_p
             # Prefill: 全プロンプトを処理してキャッシュを構築
             inputs = np.array(input_ids[-1024:])
         else:
-            # Incremental: 新トークンのみ処理
+            # Decode: 新トークンのみ処理
             inputs = np.array([input_ids[-1]])
 
         # 順伝播（KV キャッシュ付き）
