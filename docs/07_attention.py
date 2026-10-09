@@ -59,18 +59,42 @@ print(f"トークン数: {len(tokens)}")
 
 # 0. Q・K・V の人工例
 print("\n" + "=" * 50)
-print("0. Q・K・V の人工例（軸: [動物, 地名, 動作]）")
-toy_tokens = ["cat", "Paris", "run"]
-# K（見出し）: 該当する軸だけ 1
-toy_k = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]], dtype=np.float32)
-# V（中身）: 意味のない任意の数値
-toy_v = np.array([[10, 0], [0, 20], [5, 5]], dtype=np.float32)
-for query in [[3, 0, 0], [0, 3, 0], [3, 0, 3]]:
-    toy_scores = toy_k @ np.array(query, dtype=np.float32)  # Q と K の内積
-    toy_weights = softmax(toy_scores)                       # 注目度（合計 1）
-    toy_result = toy_weights @ toy_v                        # 注目度で V を混ぜる
-    weights_s = ", ".join(f"{t}: {w:.2f}" for t, w in zip(toy_tokens, toy_weights))
-    print(f"  Q = {query}: 注目度 {{{weights_s}}} -> 取り出された情報 [{toy_result[0]:.1f}, {toy_result[1]:.1f}]")
+print("0. Q・K・V の人工例（軸: [名詞, 形容詞, 金融, 地形]）")
+# 入力ベクトルの軸: [名詞, 形容詞, 金融, 地形]
+toy_embeddings = {
+    "a":          [0, 0, 0, 0],
+    "commercial": [0, 1, 1, 0],
+    "grassy":     [0, 1, 0, 1],
+    "bank":       [1, 0, 0, 0],
+}
+
+# 出力射影: [金融, 地形] を入力と同じ 4 次元の軸に戻す
+# [f, t] @ toy_w_out = [0, 0, f, t]
+toy_w_out = np.array([[0, 0, 1, 0],
+                      [0, 0, 0, 1]], dtype=np.float32)
+
+for adjective in ["commercial", "grassy"]:
+    toy_tokens = ["a", adjective, "bank"]
+    toy_x = np.array([toy_embeddings[t] for t in toy_tokens], dtype=np.float32)
+
+    # 全トークンの Q・K・V を、それぞれの入力から同じルールで作る
+    toy_q = 3 * toy_x[:, :1]  # 重み [3, 0, 0, 0] との内積（3 トークン × 1 次元）
+    toy_k = toy_x[:, 1:2]    # 重み [0, 1, 0, 0] との内積（3 トークン × 1 次元）
+    toy_v = toy_x[:, 2:]     # 金融・地形成分（3 トークン × 2 次元）
+
+    # 最後の bank の Q で、各トークンの K を照合する
+    # bank より後ろのトークンはないので、ここではマスクする対象がない
+    # Q・K は 1 次元なので、スケーリング係数 sqrt(d_k) は 1
+    toy_scores = toy_q[-1] @ toy_k.T
+    toy_weights = softmax(toy_scores)
+    toy_result = toy_weights @ toy_v
+    toy_projected = toy_result @ toy_w_out  # 2 次元 → 4 次元（出力射影）
+    toy_bank_out = toy_x[-1] + toy_projected  # 元の bank に加算（残差接続）
+    print(f"  a {adjective} bank: Q_bank = {toy_q[-1]}, "
+          f"scores = {toy_scores}, weights = {toy_weights.round(3)}, "
+          f"received = {toy_result.round(3)}")
+    print(f"    bank: {toy_x[-1]} + {toy_projected.round(3)} "
+          f"= {toy_bank_out.round(3)}")
 
 # 1. 注目度行列（Head 0）をテーブル出力
 print("\n" + "=" * 50)
